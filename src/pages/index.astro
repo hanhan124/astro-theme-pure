@@ -33,18 +33,60 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
 
       <div class='flex flex-col items-center gap-y-4'>
         <h1 class='text-3xl font-bold'>{config.author}</h1>
-        <div class='flex flex-wrap justify-center gap-x-7 gap-y-3'>
+        <div class='flex flex-wrap justify-center gap-x-6 gap-y-3'>
           <Label title='Taipa, Macao, China' as='a' href='https://www.bing.com/maps?q=Taipa,Macao,China' target='_blank'>
             <Icon name='location' class='size-5' slot='icon' />
           </Label>
           <Label
--            title='1079339223@qq.com'
-+            title='Contact me'
+            title='Contact me'
             as='a'
             href='mailto:1079339223@qq.com'
           >
             <Icon name='email' class='size-5' slot='icon' />
           </Label>
+
+          <Label
+            as='a'
+            href='https://b23.tv/D200vzK'
+          >
+            <Icon name='bilibili' class='size-5' slot='icon' />
+          </Label>
+
+          <Label
+            as='a'
+            href='https://www.zhihu.com/people/han-shuo-61-11'
+          >
+            <Icon name='zhihu' class='size-5' slot='icon' />
+          </Label>
+
+          <Label
+            as='a'
+            href='http://www.coolapk.com/u/1085514'
+          >
+            <Icon name='coolapk' class='size-5' slot='icon' />
+          </Label>          
+
+          <Label
+            as='a'
+            href='https://y.music.163.com/m/user?id=352934338'
+          >
+            <Icon name='netease' class='size-5' slot='icon' />
+          </Label>              
+
+          <Label
+            as='a'
+            href='https://v.douyin.com/AvA09RAhfiY/ 4@8.com'
+          >
+            <Icon name='tiktok' class='size-5' slot='icon' />
+          </Label>   
+          
+          <Label
+            as='a'
+            href='https://www.xiaohongshu.com/user/profile/5eac2d6e0000000001000b9b?xsec_token=YBABOPzP-4pU2wJ9rQzW8zfaW0y_r_rqLoqiVnkiDse08%3D&xsec_source=app_share&xhsshare=CopyLink&shareRedId=N0tDQzVJOk42NzUyOTgwNjY0OTc0Rz9L&apptime=1757791769&share_id=83f24763a08f4ac09eec95964151b99e&share_channel=copy_link'
+          >
+            <Icon name='instagram' class='size-5' slot='icon' />
+          </Label>   
+
         </div>
       </div>
 
