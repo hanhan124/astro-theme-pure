@@ -1,3 +1,15 @@
+---
+title: Funannotate 离线镜像安装笔记（Docker 版）
+publishDate: 2025-09-14
+description: Funannotate安装
+tags:
+  - Funannotate
+  - 生信
+heroImage:
+  src: 
+  color: "#64574D"
+language: 中文
+---
 
 > Funannotate 是一个基因组预测、注释与比较软件包，最初为 30 Mb 级真菌基因组设计，现已支持更大基因组，同时提供轻量级比较基因组平台。  
 > 通过 `funannotate annotate` 注释后的基因组可直接用 `funannotate compare` 生成 HTML 报告，支持同源聚类、系统发育树、GO 富集及 dN/dS 计算。  
