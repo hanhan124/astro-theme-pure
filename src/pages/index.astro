@@ -12,11 +12,10 @@ import SkillLayout from '@/components/home/SkillLayout.astro'
 import avatar from '@/assets/avatar.png'
 import config from '@/site-config'
 
-const languages = ['Html', 'JavaScript', 'CSS', 'Shell']
-const frontend = ['TypeScript', 'Vite', 'Webpack', 'Astro']
-const backend = ['Vercel', 'Waline']
+const languages = ['R', 'Python', 'HTML', 'Shell']
+const Tools = ['Linux', 'Vercel', 'System recovery', 'Astro', 'Waline']
 
-const MAX_POSTS = 10
+const MAX_POSTS = 5
 const allPosts = await getBlogCollection()
 const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
 ---
@@ -34,7 +33,7 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
       <div class='flex flex-col items-center gap-y-4'>
         <h1 class='text-3xl font-bold'>{config.author}</h1>
         <div class='flex flex-wrap justify-center gap-x-6 gap-y-3'>
-          <Label title='Taipa, Macao, China' as='a' href='https://www.bing.com/maps?q=Taipa,Macao,China' target='_blank'>
+          <Label title='Taipa, Macau, China' as='a' href='https://www.bing.com/maps?q=Taipa,Macao,China' target='_blank'>
             <Icon name='location' class='size-5' slot='icon' />
           </Label>
           <Label
@@ -122,9 +121,9 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
 
     <div id='content' class='animate flex flex-col gap-y-10 md:w-4/5 lg:w-5/6'>
       <Section title='About'>
-        <p class='text-muted-foreground'>PhD student</p>
+        <p class='text-muted-foreground'>Hi, I’m Han</p>
         <p class='text-muted-foreground'>
-          Hi, I’m Han, a PhD student in biomedicine. My days are stitched together from experiments, data, failures, and the rare, glittering success. This blog is the quiet corner where I jot down what happens in lab—and what happens when I step away from the microscope.
+          A PhD student in biomedicine. My days are stitched together from experiments, data, failures, and the rare, glittering success. This blog is the quiet corner where I jot down what happens in lab—and what happens when I step away from the microscope.
 
         </p>
       </Section>
@@ -203,20 +202,9 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
         </div>
       </Section>
 
-      <Section title='Certifications'>
-        <Card
-          as='a'
-          heading='Lorem ipsum'
-          subheading='Lorem ipsum dolor sit amet, vidit suscipit at mei. Quem denique mea id. Usu ei regione indoctum dissentiunt, cu meliore fuisset mei, vel quod voluptua ne. Ex dicat impedit mel, at eum oratio possit voluptatum. Dicat ceteros cu vim. Impetus fuisset ullamcorper pri cu, his posse iisque ad, aliquam honestatis usu id.'
-          date='July 2024'
-          href='https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-        />
-      </Section>
-
       <Section title='Skills'>
         <SkillLayout title='Languages' skills={languages} />
-        <SkillLayout title='Frontend' skills={frontend} />
-        <SkillLayout title='Backend' skills={backend} />
+        <SkillLayout title='Tools' skills={Tools} />
       </Section>
     </div>
     <Quote class='mt-12' />

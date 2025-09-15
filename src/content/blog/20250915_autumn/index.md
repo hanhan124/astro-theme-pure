@@ -2,6 +2,7 @@
 title: 故都的秋
 publishDate: 2025-09-15
 description: 郁达夫
+author: 郁达夫
 tags:
   - 散文
   - 郁达夫
@@ -9,7 +10,7 @@ tags:
 heroImage:
   src: ./thumbnail.jpg
   color: "#64574D"
-language: English
+language: 中文
 ---
 秋天，无论在什么地方的秋天，总是好的；可是啊，北国的秋，却特别地来得清，来得静，来得悲凉。我的不远千里，要从杭州赶上青岛，更要从青岛赶上北平来的理由，也不过想饱尝一尝这“秋”，这故都的秋味。
 

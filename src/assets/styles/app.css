@@ -61,15 +61,24 @@ html {
 }
 :root {
   --un-default-border-color: hsl(var(--border) / 1);
+  /* 网格背景变量 */
+  --grid-color: hsl(var(--border) / 0.3);
+  --grid-size: 24px;
+  --grid-width: 1px;
+}
+
+/* 深色模式网格颜色 */
+.dark {
+  --grid-color: hsl(var(--border) / 0.2);
+}
+
+/* 网格背景样式 */
+body {
+  background-image: 
+    linear-gradient(var(--grid-color) var(--grid-width), transparent var(--grid-width)),
+    linear-gradient(90deg, var(--grid-color) var(--grid-width), transparent var(--grid-width));
+  background-size: var(--grid-size) var(--grid-size);
 }
 html.dark {
   color-scheme: dark;
-}
-
-/* Global */
-a {
-  transition: color 0.2s ease;
-  &:hover {
-    color: hsl(var(--primary) / var(--un-text-opacity, 1));
-  }
 }
