@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCR 引物 Tm 值计算器 - Material Design</title>
+    <style>
+        :root {
+            --md-primary: #006874;
+            --md-primary-container: #CCE7EA;
+            --md-secondary: #4A6267;
+            --md-tertiary: #525E7D;
+            --md-surface: #FEFBFF;
+            --md-background: #FEFBFF;
+            --md-on-surface: #1D1B20;
+            --md-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --md-shadow-2: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--md-background);
+            color: var(--md-on-surface);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-bar {
+            background-color: var(--md-surface);
+            box-shadow: var(--md-shadow-1);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-bar h1 {
+            font-size: 22px;
+            font-weight: 400;
+            color: var(--md-on-surface);
+            letter-spacing: 0.15px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .calculator-container {
+            background-color: var(--md-surface);
+            border-radius: 28px;
+            padding: 32px;
+            box-shadow: var(--md-shadow-2);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .input-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--md-primary);
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--md-on-surface-variant);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--md-primary-container);
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            background-color: var(--md-surface);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--md-primary);
+            box-shadow: 0 0 0 3px rgba(0, 104, 116, 0.1);
+        }
+
+        .calc-button {
+            background-color: var(--md-primary);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--md-shadow-1);
+        }
+
+        .calc-button:hover {
+            box-shadow: var(--md-shadow-2);
+            transform: translateY(-2px);
+        }
+
+        .results-section {
+            background-color: var(--md-primary-container);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: var(--md-on-surface-variant);
+        }
+
+        .result-value {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--md-primary);
+        }
+
+        .formula-section {
+            background-color: var(--md-surface-variant);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+
+        .formula-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: var(--md-on-surface-variant);
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--md-on-surface);
+            line-height: 1.6;
+        }
+
+        .tips-section {
+            background-color: var(--md-secondary-container);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+
+        .tips-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: var(--md-secondary);
+        }
+
+        .tips-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .tips-list li {
+            font-size: 14px;
+            color: var(--md-on-surface-variant);
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .tips-list li::before {
+            content: '•';
+            color: var(--md-secondary);
+            position: absolute;
+            left: 0;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--md-primary);
+        }
+
+        @media (max-width: 600px) {
+            .calculator-container {
+                padding: 24px;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-bar">
+        <h1>PCR 引物 Tm 值计算器</h1>
+    </header>
+
+    <main class="main-content">
+        <div class="calculator-container">
+            <div class="input-section">
+                <h2 class="section-title">引物序列输入</h2>
+                
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="sequenceType" value="dna" checked onchange="updatePlaceholder()">
+                        <span>DNA序列</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="sequenceType" value="rna" onchange="updatePlaceholder()">
+                        <span>RNA序列</span>
+                    </label>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">正向引物 (Forward Primer)</label>
+                    <textarea 
+                        id="forwardPrimer" 
+                        class="input-field" 
+                        rows="3" 
+                        placeholder="请输入正向引物序列，如: ATGCGGCTAGCTAGCTAGCTA"
+                    ></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">反向引物 (Reverse Primer)</label>
+                    <textarea 
+                        id="reversePrimer" 
+                        class="input-field" 
+                        rows="3" 
+                        placeholder="请输入反向引物序列，如: TAGCTAGCTAGCTAGCCGCATA"
+                    ></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">引物浓度 (nM)</label>
+                    <input 
+                        type="number" 
+                        id="primerConcentration" 
+                        class="input-field" 
+                        value="250" 
+                        min="50" 
+                        max="1000"
+                    >
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Na⁺ 浓度 (mM)</label>
+                    <input 
+                        type="number" 
+                        id="naConcentration" 
+                        class="input-field" 
+                        value="50" 
+                        min="0" 
+                        max="1000"
+                    >
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Mg²⁺ 浓度 (mM)</label>
+                    <input 
+                        type="number" 
+                        id="mgConcentration" 
+                        class="input-field" 
+                        value="1.5" 
+                        min="0" 
+                        max="10"
+                    >
+                </div>
+            </div>
+
+            <button class="calc-button" onclick="calculateTm()">计算 Tm 值</button>
+
+            <div id="results" class="results-section" style="display: none;">
+                <h3 class="section-title">计算结果</h3>
+                <div class="result-item">
+                    <span class="result-label">正向引物 Tm 值</span>
+                    <span class="result-value" id="forwardTm">--</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">反向引物 Tm 值</span>
+                    <span class="result-value" id="reverseTm">--</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">推荐退火温度</span>
+                    <span class="result-value" id="annealingTemp">--</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">引物长度</span>
+                    <span class="result-value" id="primerLength">--</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">GC 含量</span>
+                    <span class="result-value" id="gcContent">--</span>
+                </div>
+            </div>
+
+            <div class="formula-section">
+                <h4 class="formula-title">计算公式（ nearest-neighbor 方法）</h4>
+                <div class="formula">
+                    Tm = ΔH / (ΔS + R × ln(C/4)) - 273.15 + 16.6 × log₁₀[Na⁺]
+                    <br><br>
+                    其中：<br>
+                    ΔH = 焓变总和<br>
+                    ΔS = 熵变总和<br>
+                    R = 气体常数 (1.987 cal/mol·K)<br>
+                    C = 引物浓度<br>
+                    [Na⁺] = 钠离子浓度
+                </div>
+            </div>
+
+            <div class="tips-section">
+                <h4 class="tips-title">💡 使用提示</h4>
+                <ul class="tips-list">
+                    <li>理想的引物 Tm 值应在 58-62°C 之间</li>
+                    <li>正向和反向引物的 Tm 值差异应小于 2°C</li>
+                    <li>GC 含量应在 40-60% 之间</li>
+                    <li>避免引物二聚体和发夹结构</li>
+                    <li>引物长度建议为 18-25 个碱基</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Tm 值计算相关的常数
+        const NN_PARAMS = {
+            'AA': { dH: -9100, dS: -24.0 },
+            'TT': { dH: -9100, dS: -24.0 },
+            'AT': { dH: -8600, dS: -23.9 },
+            'TA': { dH: -5800, dS: -16.9 },
+            'CA': { dH: -5800, dS: -12.9 },
+            'TG': { dH: -5800, dS: -12.9 },
+            'GT': { dH: -8400, dS: -22.7 },
+            'AC': { dH: -8400, dS: -22.7 },
+            'CT': { dH: -7800, dS: -21.0 },
+            'AG': { dH: -7800, dS: -21.0 },
+            'GA': { dH: -8200, dS: -22.2 },
+            'TC': { dH: -8200, dS: -22.2 },
+            'CG': { dH: -10600, dS: -27.2 },
+            'GC': { dH: -9800, dS: -24.4 },
+            'GG': { dH: -8000, dS: -19.9 },
+            'CC': { dH: -8000, dS: -19.9 }
+        };
+
+        const R = 1.987; // 气体常数 cal/mol·K
+        const KELVIN = 273.15;
+
+        function updatePlaceholder() {
+            const sequenceType = document.querySelector('input[name="sequenceType"]:checked').value;
+            const forwardInput = document.getElementById('forwardPrimer');
+            const reverseInput = document.getElementById('reversePrimer');
+            
+            if (sequenceType === 'dna') {
+                forwardInput.placeholder = "请输入正向引物序列，如: ATGCGGCTAGCTAGCTAGCTA";
+                reverseInput.placeholder = "请输入反向引物序列，如: TAGCTAGCTAGCTAGCCGCATA";
+            } else {
+                forwardInput.placeholder = "请输入正向引物序列，如: AUGCGGCUAGCUAGCUAGCUA";
+                reverseInput.placeholder = "请输入反向引物序列，如: UAGCUAGCUAGCUAGCCGCAUA";
+            }
+        }
+
+        function validateSequence(sequence, type) {
+            const validChars = type === 'dna' ? /^[ATCGatcg]+$/ : /^[AUCGaucg]+$/;
+            return validChars.test(sequence) && sequence.length >= 10 && sequence.length <= 30;
+        }
+
+        function calculateGCContent(sequence) {
+            const gcCount = (sequence.match(/[GCgc]/g) || []).length;
+            return (gcCount / sequence.length) * 100;
+        }
+
+        function calculateNearestNeighbor(sequence, naConc, mgConc) {
+            const upperSeq = sequence.toUpperCase();
+            let totalDH = 0;
+            let totalDS = 0;
+
+            // 初始化末端参数
+            totalDH += 2300; // 末端dH
+            totalDS += 12.9; // 末端dS
+
+            // 计算相邻碱基对参数
+            for (let i = 0; i < upperSeq.length - 1; i++) {
+                const pair = upperSeq.substring(i, i + 2);
+                if (NN_PARAMS[pair]) {
+                    totalDH += NN_PARAMS[pair].dH;
+                    totalDS += NN_PARAMS[pair].dS;
+                }
+            }
+
+            // 盐浓度校正
+            const saltCorrection = 16.6 * Math.log10(naConc + Math.sqrt(mgConc)) / Math.log10(10);
+            
+            // 计算Tm值
+            const concentration = parseFloat(document.getElementById('primerConcentration').value) / 1e9; // 转换为M
+            const tm = (totalDH * 1000) / (totalDS + R * Math.log(concentration / 4)) - KELVIN + saltCorrection;
+            
+            return tm;
+        }
+
+        function calculateTm() {
+            const forwardSequence = document.getElementById('forwardPrimer').value.trim();
+            const reverseSequence = document.getElementById('reversePrimer').value.trim();
+            const sequenceType = document.querySelector('input[name="sequenceType"]:checked').value;
+            const naConc = parseFloat(document.getElementById('naConcentration').value);
+            const mgConc = parseFloat(document.getElementById('mgConcentration').value);
+
+            if (!forwardSequence || !reverseSequence) {
+                alert('请输入正向和反向引物序列');
+                return;
+            }
+
+            if (!validateSequence(forwardSequence, sequenceType) || !validateSequence(reverseSequence, sequenceType)) {
+                alert('引物序列只能包含 ' + (sequenceType === 'dna' ? 'A,T,C,G' : 'A,U,C,G') + ' 且长度应在10-30个碱基之间');
+                return;
+            }
+
+            // 计算正向引物Tm值
+            const forwardTm = calculateNearestNeighbor(forwardSequence, naConc, mgConc);
+            const forwardGC = calculateGCContent(forwardSequence);
+
+            // 计算反向引物Tm值
+            const reverseTm = calculateNearestNeighbor(reverseSequence, naConc, mgConc);
+            const reverseGC = calculateGCContent(reverseSequence);
+
+            // 计算推荐退火温度
+            const annealingTemp = Math.min(forwardTm, reverseTm) - 5;
+
+            // 显示结果
+            document.getElementById('forwardTm').textContent = forwardTm.toFixed(1) + ' °C';
+            document.getElementById('reverseTm').textContent = reverseTm.toFixed(1) + ' °C';
+            document.getElementById('annealingTemp').textContent = annealingTemp.toFixed(1) + ' °C';
+            document.getElementById('primerLength').textContent = forwardSequence.length + ' / ' + reverseSequence.length + ' bp';
+            document.getElementById('gcContent').textContent = forwardGC.toFixed(1) + ' % / ' + reverseGC.toFixed(1) + ' %';
+
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

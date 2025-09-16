@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNA/蛋白质序列转换工具 - Material Design</title>
+    <style>
+        :root {
+            --md-primary: #6750A4;
+            --md-primary-container: #EADDFF;
+            --md-secondary: #625B71;
+            --md-tertiary: #7D5260;
+            --md-surface: #FEFBFF;
+            --md-background: #FEFBFF;
+            --md-on-surface: #1D1B20;
+            --md-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --md-shadow-2: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--md-background);
+            color: var(--md-on-surface);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-bar {
+            background-color: var(--md-surface);
+            box-shadow: var(--md-shadow-1);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-bar h1 {
+            font-size: 22px;
+            font-weight: 400;
+            color: var(--md-on-surface);
+            letter-spacing: 0.15px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .tool-container {
+            background-color: var(--md-surface);
+            border-radius: 28px;
+            padding: 32px;
+            box-shadow: var(--md-shadow-2);
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .tool-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .tool-title {
+            font-size: 28px;
+            font-weight: 400;
+            color: var(--md-primary);
+            margin-bottom: 8px;
+        }
+
+        .tool-subtitle {
+            font-size: 16px;
+            color: var(--md-on-surface-variant);
+        }
+
+        .conversion-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            background-color: var(--md-surface-variant);
+            border-radius: 16px;
+            padding: 4px;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            background-color: transparent;
+            color: var(--md-on-surface-variant);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-button.active {
+            background-color: var(--md-primary);
+            color: white;
+            box-shadow: var(--md-shadow-1);
+        }
+
+        .conversion-panel {
+            display: none;
+        }
+
+        .conversion-panel.active {
+            display: block;
+        }
+
+        .sequence-input {
+            margin-bottom: 24px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--md-on-surface-variant);
+        }
+
+        .sequence-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 16px;
+            border: 2px solid var(--md-primary-container);
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            transition: all 0.2s ease;
+        }
+
+        .sequence-textarea:focus {
+            outline: none;
+            border-color: var(--md-primary);
+            box-shadow: 0 0 0 3px rgba(103, 80, 164, 0.1);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--md-primary);
+        }
+
+        .convert-button {
+            background-color: var(--md-primary);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--md-shadow-1);
+            width: 100%;
+        }
+
+        .convert-button:hover {
+            box-shadow: var(--md-shadow-2);
+            transform: translateY(-2px);
+        }
+
+        .result-section {
+            background-color: var(--md-primary-container);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--md-primary);
+        }
+
+        .copy-button {
+            background-color: var(--md-secondary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .copy-button:hover {
+            background-color: var(--md-secondary-container);
+            color: var(--md-secondary);
+        }
+
+        .result-content {
+            background-color: var(--md-surface);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .stat-item {
+            background-color: var(--md-surface);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--md-on-surface-variant);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--md-primary);
+        }
+
+        .codon-table {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .codon-item {
+            background-color: var(--md-surface);
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .codon-triplet {
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+            color: var(--md-primary);
+        }
+
+        .codon-amino-acid {
+            margin-top: 4px;
+            color: var(--md-on-surface-variant);
+        }
+
+        @media (max-width: 768px) {
+            .tool-container {
+                padding: 24px;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-bar">
+        <h1>DNA/蛋白质序列转换工具</h1>
+    </header>
+
+    <main class="main-content">
+        <div class="tool-container">
+            <div class="tool-header">
+                <h2 class="tool-title">序列转换工具</h2>
+                <p class="tool-subtitle">DNA ↔ RNA ↔ 蛋白质序列相互转换</p>
+            </div>
+
+            <div class="conversion-tabs">
+                <button class="tab-button active" onclick="switchTab('dna-to-protein')">DNA → 蛋白质</button>
+                <button class="tab-button" onclick="switchTab('protein-to-dna')">蛋白质 → DNA</button>
+                <button class="tab-button" onclick="switchTab('dna-to-rna')">DNA ↔ RNA</button>
+                <button class="tab-button" onclick="switchTab('sequence-tools')">序列工具</button>
+            </div>
+
+            <!-- DNA to Protein -->
+            <div id="dna-to-protein" class="conversion-panel active">
+                <div class="sequence-input">
+                    <label class="input-label">DNA 序列 (5' → 3')</label>
+                    <textarea id="dnaSequence" class="sequence-textarea" placeholder="请输入DNA序列，如: ATGAAACGCATTAGCAGCGTCTGATTTCCCC..."></textarea>
+                </div>
+
+                <div class="options-grid">
+                    <div class="option-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="includeMet" checked>
+                            <span>包含起始密码子</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="includeStop" checked>
+                            <span>包含终止密码子</span>
+                        </label>
+                    </div>
+                    <div class="option-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showCodonNumbers" checked>
+                            <span>显示密码子编号</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showFrame" checked>
+                            <span>显示阅读框</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button class="convert-button" onclick="convertDnaToProtein()">转换为蛋白质</button>
+
+                <div id="proteinResult" class="result-section" style="display: none;">
+                    <div class="result-header">
+                        <h4 class="result-title">蛋白质序列</h4>
+                        <button class="copy-button" onclick="copyResult('proteinOutput')">复制</button>
+                    </div>
+                    <div id="proteinOutput" class="result-content"></div>
+                    <div class="stats-grid" id="proteinStats"></div>
+                </div>
+            </div>
+
+            <!-- Protein to DNA -->
+            <div id="protein-to-dna" class="conversion-panel">
+                <div class="sequence-input">
+                    <label class="input-label">蛋白质序列</label>
+                    <textarea id="proteinSequence" class="sequence-textarea" placeholder="请输入蛋白质序列，如: MKRISRVIFP..."></textarea>
+                </div>
+
+                <div class="options-grid">
+                    <div class="option-group">
+                        <label class="input-label">密码子偏好</label>
+                        <select id="codonPreference" class="input-field">
+                            <option value="human">人类</option>
+                            <option value="mouse">小鼠</option>
+                            <option value="e.coli">大肠杆菌</option>
+                            <option value="yeast">酵母</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="addStartCodon" checked>
+                            <span>添加起始密码子</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="addStopCodon" checked>
+                            <span>添加终止密码子</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button class="convert-button" onclick="convertProteinToDna()">转换为DNA</button>
+
+                <div id="dnaResult" class="result-section" style="display: none;">
+                    <div class="result-header">
+                        <h4 class="result-title">DNA 序列</h4>
+                        <button class="copy-button" onclick="copyResult('dnaOutput')">复制</button>
+                    </div>
+                    <div id="dnaOutput" class="result-content"></div>
+                    <div class="stats-grid" id="dnaStats"></div>
+                </div>
+            </div>
+
+            <!-- DNA to RNA -->
+            <div id="dna-to-rna" class="conversion-panel">
+                <div class="sequence-input">
+                    <label class="input-label">输入序列</label>
+                    <textarea id="nucleotideSequence" class="sequence-textarea" placeholder="请输入DNA或RNA序列..."></textarea>
+                </div>
+
+                <div class="options-grid">
+                    <div class="option-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="reverseComplement">
+                            <span>反向互补</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="reverseTranscribe">
+                            <span>反转录</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button class="convert-button" onclick="convertNucleotides()">转换序列</button>
+
+                <div id="nucleotideResult" class="result-section" style="display: none;">
+                    <div class="result-header">
+                        <h4 class="result-title">转换结果</h4>
+                        <button class="copy-button" onclick="copyResult('nucleotideOutput')">复制</button>
+                    </div>
+                    <div id="nucleotideOutput" class="result-content"></div>
+                </div>
+            </div>
+
+            <!-- Sequence Tools -->
+            <div id="sequence-tools" class="conversion-panel">
+                <h3 class="section-title">密码子表</h3>
+                <div class="codon-table" id="codonTable"></div>
+                
+                <div style="margin-top: 24px;">
+                    <h3 class="section-title">序列统计</h3>
+                    <div class="sequence-input">
+                        <label class="input-label">输入序列进行分析</label>
+                        <textarea id="analysisSequence" class="sequence-textarea" placeholder="请输入DNA、RNA或蛋白质序列..."></textarea>
+                    </div>
+                    <button class="convert-button" onclick="analyzeSequence()">分析序列</button>
+                    
+                    <div id="analysisResult" class="result-section" style="display: none;">
+                        <div class="stats-grid" id="analysisStats"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 遗传密码子表
+        const codonTable = {
+            'TTT': 'F', 'TTC': 'F', 'TTA': 'L', 'TTG': 'L',
+            'TCT': 'S', 'TCC': 'S', 'TCA': 'S', 'TCG': 'S',
+            'TAT': 'Y', 'TAC': 'Y', 'TAA': '*', 'TAG': '*',
+            'TGT': 'C', 'TGC': 'C', 'TGA': '*', 'TGG': 'W',
+            'CTT': 'L', 'CTC': 'L', 'CTA': 'L', 'CTG': 'L',
+            'CCT': 'P', 'CCC': 'P', 'CCA': 'P', 'CCG': 'P',
+            'CAT': 'H', 'CAC': 'H', 'CAA': 'Q', 'CAG': 'Q',
+            'CGT': 'R', 'CGC': 'R', 'CGA': 'R', 'CGG': 'R',
+            'ATT': 'I', 'ATC': 'I', 'ATA': 'I', 'ATG': 'M',
+            'ACT': 'T', 'ACC': 'T', 'ACA': 'T', 'ACG': 'T',
+            'AAT': 'N', 'AAC': 'N', 'AAA': 'K', 'AAG': 'K',
+            'AGT': 'S', 'AGC': 'S', 'AGA': 'R', 'AGG': 'R',
+            'GTT': 'V', 'GTC': 'V', 'GTA': 'V', 'GTG': 'V',
+            'GCT': 'A', 'GCC': 'A', 'GCA': 'A', 'GCG': 'A',
+            'GAT': 'D', 'GAC': 'D', 'GAA': 'E', 'GAG': 'E',
+            'GGT': 'G', 'GGC': 'G', 'GGA': 'G', 'GGG': 'G'
+        };
+
+        // 反向密码子表
+        const reverseCodonTable = {};
+        for (const [codon, aminoAcid] of Object.entries(codonTable)) {
+            if (!reverseCodonTable[aminoAcid]) {
+                reverseCodonTable[aminoAcid] = [];
+            }
+            reverseCodonTable[aminoAcid].push(codon);
+        }
+
+        // 密码子偏好表 (简化版)
+        const codonPreference = {
+            human: {
+                'F': 'TTT', 'L': 'CTG', 'I': 'ATC', 'M': 'ATG', 'V': 'GTG',
+                'S': 'TCC', 'P': 'CCC', 'T': 'ACC', 'A': 'GCC', 'Y': 'TAC',
+                'H': 'CAC', 'Q': 'CAG', 'N': 'AAC', 'K': 'AAG', 'D': 'GAC',
+                'E': 'GAG', 'C': 'TGC', 'W': 'TGG', 'R': 'CGC', 'G': 'GGC',
+                '*': 'TAA'
+            },
+            'e.coli': {
+                'F': 'TTC', 'L': 'CTG', 'I': 'ATC', 'M': 'ATG', 'V': 'GTT',
+                'S': 'TCT', 'P': 'CCG', 'T': 'ACC', 'A': 'GCG', 'Y': 'TAT',
+                'H': 'CAT', 'Q': 'CAG', 'N': 'AAC', 'K': 'AAA', 'D': 'GAT',
+                'E': 'GAA', 'C': 'TGC', 'W': 'TGG', 'R': 'CGT', 'G': 'GGC',
+                '*': 'TAA'
+            }
+        };
+
+        // 氨基酸名称
+        const aminoAcidNames = {
+            'F': '苯丙氨酸 (Phe)', 'L': '亮氨酸 (Leu)', 'I': '异亮氨酸 (Ile)',
+            'M': '甲硫氨酸 (Met)', 'V': '缬氨酸 (Val)', 'S': '丝氨酸 (Ser)',
+            'P': '脯氨酸 (Pro)', 'T': '苏氨酸 (Thr)', 'A': '丙氨酸 (Ala)',
+            'Y': '酪氨酸 (Tyr)', 'H': '组氨酸 (His)', 'Q': '谷氨酰胺 (Gln)',
+            'N': '天冬酰胺 (Asn)', 'K': '赖氨酸 (Lys)', 'D': '天冬氨酸 (Asp)',
+            'E': '谷氨酸 (Glu)', 'C': '半胱氨酸 (Cys)', 'W': '色氨酸 (Trp)',
+            'R': '精氨酸 (Arg)', 'G': '甘氨酸 (Gly)', '*': '终止密码子'
+        };
+
+        function switchTab(tabName) {
+            // 更新标签按钮状态
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // 更新面板显示
+            document.querySelectorAll('.conversion-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+
+            // 如果是序列工具标签，渲染密码子表
+            if (tabName === 'sequence-tools') {
+                renderCodonTable();
+            }
+        }
+
+        function renderCodonTable() {
+            const codonTableElement = document.getElementById('codonTable');
+            codonTableElement.innerHTML = '';
+
+            for (const [codon, aminoAcid] of Object.entries(codonTable)) {
+                const codonItem = document.createElement('div');
+                codonItem.className = 'codon-item';
+                codonItem.innerHTML = `
+                    <div class="codon-triplet">${codon}</div>
+                    <div class="codon-amino-acid">${aminoAcid} ${aminoAcidNames[aminoAcid]?.split(' ')[0] || ''}</div>
+                `;
+                codonTableElement.appendChild(codonItem);
+            }
+        }
+
+        function convertDnaToProtein() {
+            const dnaSequence = document.getElementById('dnaSequence').value.trim().toUpperCase();
+            
+            if (!dnaSequence) {
+                alert('请输入DNA序列');
+                return;
+            }
+
+            if (!/^[ATCG]+$/.test(dnaSequence)) {
+                alert('DNA序列只能包含 A, T, C, G');
+                return;
+            }
+
+            const includeMet = document.getElementById('includeMet').checked;
+            const includeStop = document.getElementById('includeStop').checked;
+            const showCodonNumbers = document.getElementById('showCodonNumbers').checked;
+            const showFrame = document.getElementById('showFrame').checked;
+
+            // 检查所有三个阅读框
+            const results = [];
+            for (let frame = 0; frame < 3; frame++) {
+                let protein = '';
+                let codonInfo = [];
+                
+                for (let i = frame; i < dnaSequence.length - 2; i += 3) {
+                    const codon = dnaSequence.substring(i, i + 3);
+                    const aminoAcid = codonTable[codon] || 'X';
+                    
+                    if (aminoAcid === '*' && !includeStop) break;
+                    
+                    protein += aminoAcid;
+                    codonInfo.push({
+                        codon: codon,
+                        aminoAcid: aminoAcid,
+                        position: i + 1
+                    });
+                }
+                
+                if (protein.length > 0) {
+                    results.push({
+                        frame: frame + 1,
+                        protein: protein,
+                        codonInfo: codonInfo
+                    });
+                }
+            }
+
+            // 显示结果
+            let output = '';
+            let totalCodons = 0;
+            
+            results.forEach((result, index) => {
+                if (index > 0) output += '\n\n';
+                
+                if (showFrame) {
+                    output += `阅读框 ${result.frame}:\n`;
+                }
+                
+                if (showCodonNumbers) {
+                    result.codonInfo.forEach((info, i) => {
+                        output += `${info.codon}(${info.aminoAcid}) `;
+                        if ((i + 1) % 10 === 0) output += '\n';
+                    });
+                    output += '\n\n蛋白质序列:\n';
+                }
+                
+                output += result.protein;
+                totalCodons = result.codonInfo.length;
+            });
+
+            document.getElementById('proteinOutput').textContent = output;
+            document.getElementById('proteinResult').style.display = 'block';
+
+            // 显示统计信息
+            const stats = [
+                { label: 'DNA长度', value: dnaSequence.length + ' bp' },
+                { label: '密码子数', value: totalCodons },
+                { label: '蛋白质长度', value: results[0]?.protein.length + ' aa' },
+                { label: 'GC含量', value: calculateGCContent(dnaSequence).toFixed(1) + '%' }
+            ];
+
+            renderStats('proteinStats', stats);
+        }
+
+        function convertProteinToDna() {
+            const proteinSequence = document.getElementById('proteinSequence').value.trim().toUpperCase();
+            const codonPref = document.getElementById('codonPreference').value;
+            const addStartCodon = document.getElementById('addStartCodon').checked;
+            const addStopCodon = document.getElementById('addStopCodon').checked;
+
+            if (!proteinSequence) {
+                alert('请输入蛋白质序列');
+                return;
+            }
+
+            if (!/^[ACDEFGHIKLMNPQRSTVWXY*]+$/.test(proteinSequence)) {
+                alert('蛋白质序列包含非法字符');
+                return;
+            }
+
+            let dnaSequence = '';
+            const codonUsage = codonPreference[codonPref] || codonPreference.human;
+
+            if (addStartCodon) {
+                dnaSequence += 'ATG'; // 起始密码子
+            }
+
+            for (let i = 0; i < proteinSequence.length; i++) {
+                const aminoAcid = proteinSequence[i];
+                const possibleCodons = reverseCodonTable[aminoAcid] || ['TAA'];
+                const preferredCodon = codonUsage[aminoAcid] || possibleCodons[0];
+                dnaSequence += preferredCodon;
+            }
+
+            if (addStopCodon) {
+                dnaSequence += 'TAA'; // 终止密码子
+            }
+
+            document.getElementById('dnaOutput').textContent = formatDnaSequence(dnaSequence);
+            document.getElementById('dnaResult').style.display = 'block';
+
+            // 显示统计信息
+            const stats = [
+                { label: '蛋白质长度', value: proteinSequence.length + ' aa' },
+                { label: 'DNA长度', value: dnaSequence.length + ' bp' },
+                { label: 'GC含量', value: calculateGCContent(dnaSequence).toFixed(1) + '%' }
+            ];
+
+            renderStats('dnaStats', stats);
+        }
+
+        function convertNucleotides() {
+            const sequence = document.getElementById('nucleotideSequence').value.trim().toUpperCase();
+            const reverseComplement = document.getElementById('reverseComplement').checked;
+            const reverseTranscribe = document.getElementById('reverseTranscribe').checked;
+
+            if (!sequence) {
+                alert('请输入序列');
+                return;
+            }
+
+            let result = '';
+            let isDNA = /^[ATCG]+$/.test(sequence);
+            let isRNA = /^[AUCG]+$/.test(sequence);
+
+            if (!isDNA && !isRNA) {
+                alert('序列只能包含 A, T/U, C, G');
+                return;
+            }
+
+            if (reverseTranscribe) {
+                // 反转录
+                if (isRNA) {
+                    result = sequence.replace(/U/g, 'T');
+                } else {
+                    result = sequence.replace(/T/g, 'U');
+                }
+            } else if (reverseComplement) {
+                // 反向互补
+                result = getReverseComplement(sequence);
+            } else {
+                // DNA ↔ RNA 转换
+                if (isDNA) {
+                    result = sequence.replace(/T/g, 'U');
+                } else {
+                    result = sequence.replace(/U/g, 'T');
+                }
+            }
+
+            document.getElementById('nucleotideOutput').textContent = formatDnaSequence(result);
+            document.getElementById('nucleotideResult').style.display = 'block';
+        }
+
+        function analyzeSequence() {
+            const sequence = document.getElementById('analysisSequence').value.trim().toUpperCase();
+            
+            if (!sequence) {
+                alert('请输入序列');
+                return;
+            }
+
+            let stats = [];
+
+            if (/^[ATCG]+$/.test(sequence)) {
+                // DNA 序列
+                const gcContent = calculateGCContent(sequence);
+                const atContent = 100 - gcContent;
+                const molecularWeight = calculateMolecularWeight(sequence, 'dna');
+                
+                stats = [
+                    { label: '序列类型', value: 'DNA' },
+                    { label: '长度', value: sequence.length + ' bp' },
+                    { label: 'GC含量', value: gcContent.toFixed(1) + '%' },
+                    { label: 'AT含量', value: atContent.toFixed(1) + '%' },
+                    { label: '分子量', value: molecularWeight.toFixed(0) + ' Da' }
+                ];
+            } else if (/^[AUCG]+$/.test(sequence)) {
+                // RNA 序列
+                const gcContent = calculateGCContent(sequence.replace(/U/g, 'T'));
+                const molecularWeight = calculateMolecularWeight(sequence, 'rna');
+                
+                stats = [
+                    { label: '序列类型', value: 'RNA' },
+                    { label: '长度', value: sequence.length + ' nt' },
+                    { label: 'GC含量', value: gcContent.toFixed(1) + '%' },
+                    { label: '分子量', value: molecularWeight.toFixed(0) + ' Da' }
+                ];
+            } else if (/^[ACDEFGHIKLMNPQRSTVWXY]+$/.test(sequence)) {
+                // 蛋白质序列
+                const molecularWeight = calculateProteinMolecularWeight(sequence);
+                const aromaticContent = calculateAromaticContent(sequence);
+                const acidicContent = calculateAcidicContent(sequence);
+                const basicContent = calculateBasicContent(sequence);
+                
+                stats = [
+                    { label: '序列类型', value: '蛋白质' },
+                    { label: '长度', value: sequence.length + ' aa' },
+                    { label: '分子量', value: molecularWeight.toFixed(0) + ' Da' },
+                    { label: '芳香族含量', value: aromaticContent.toFixed(1) + '%' },
+                    { label: '酸性含量', value: acidicContent.toFixed(1) + '%' },
+                    { label: '碱性含量', value: basicContent.toFixed(1) + '%' }
+                ];
+            } else {
+                alert('无法识别的序列类型');
+                return;
+            }
+
+            renderStats('analysisStats', stats);
+            document.getElementById('analysisResult').style.display = 'block';
+        }
+
+        // 辅助函数
+        function getReverseComplement(sequence) {
+            const complement = { 'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C', 'U': 'A' };
+            return sequence.split('').reverse().map(base => complement[base] || base).join('');
+        }
+
+        function formatDnaSequence(sequence) {
+            // 每10个碱基分组，每50个碱基换行
+            let formatted = '';
+            for (let i = 0; i < sequence.length; i += 10) {
+                if (i > 0 && i % 50 === 0) formatted += '\n';
+                formatted += sequence.substring(i, i + 10) + ' ';
+            }
+            return formatted.trim();
+        }
+
+        function calculateGCContent(sequence) {
+            const gcCount = (sequence.match(/[GCgc]/g) || []).length;
+            return (gcCount / sequence.length) * 100;
+        }
+
+        function calculateMolecularWeight(sequence, type) {
+            // 简化的分子量计算
+            const baseWeights = type === 'dna' ? 
+                { 'A': 331.2, 'T': 322.2, 'C': 307.2, 'G': 347.2 } :
+                { 'A': 347.2, 'U': 308.2, 'C': 323.2, 'G': 363.2 };
+            
+            let weight = 0;
+            for (const base of sequence) {
+                weight += baseWeights[base] || 0;
+            }
+            return weight - (sequence.length - 1) * 18; // 减去水分子
+        }
+
+        function calculateProteinMolecularWeight(sequence) {
+            // 氨基酸平均分子量（简化计算）
+            const avgAminoAcidWeight = 110;
+            return sequence.length * avgAminoAcidWeight - (sequence.length - 1) * 18;
+        }
+
+        function calculateAromaticContent(sequence) {
+            const aromaticAAs = ['F', 'Y', 'W'];
+            const count = sequence.split('').filter(aa => aromaticAAs.includes(aa)).length;
+            return (count / sequence.length) * 100;
+        }
+
+        function calculateAcidicContent(sequence) {
+            const acidicAAs = ['D', 'E'];
+            const count = sequence.split('').filter(aa => acidicAAs.includes(aa)).length;
+            return (count / sequence.length) * 100;
+        }
+
+        function calculateBasicContent(sequence) {
+            const basicAAs = ['K', 'R', 'H'];
+            const count = sequence.split('').filter(aa => basicAAs.includes(aa)).length;
+            return (count / sequence.length) * 100;
+        }
+
+        function renderStats(elementId, stats) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = '';
+            
+            stats.forEach(stat => {
+                const statItem = document.createElement('div');
+                statItem.className = 'stat-item';
+                statItem.innerHTML = `
+                    <div class="stat-label">${stat.label}</div>
+                    <div class="stat-value">${stat.value}</div>
+                `;
+                element.appendChild(statItem);
+            });
+        }
+
+        function copyResult(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // 显示复制成功提示
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = '已复制!';
+                button.style.backgroundColor = 'var(--md-primary)';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.backgroundColor = '';
+                }, 2000);
+            });
+        }
+
+        // 初始化
+        renderCodonTable();
+    </script>
+</body>
+</html>

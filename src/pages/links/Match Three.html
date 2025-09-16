@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>连连看 - Material Design</title>
+    <style>
+        :root {
+            /* Material Design 3 色彩系统 */
+            --md-primary: #6750A4;
+            --md-primary-container: #EADDFF;
+            --md-secondary: #625B71;
+            --md-secondary-container: #E8DEF8;
+            --md-tertiary: #7D5260;
+            --md-tertiary-container: #FFD8E4;
+            --md-surface: #FEFBFF;
+            --md-surface-variant: #E7E0EC;
+            --md-background: #FEFBFF;
+            --md-on-surface: #1D1B20;
+            --md-on-surface-variant: #49454F;
+            --md-outline: #79747E;
+            --md-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --md-shadow-2: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+            --md-shadow-3: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.06);
+            --md-shadow-4: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--md-background);
+            color: var(--md-on-surface);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部应用栏 */
+        .app-bar {
+            background-color: var(--md-surface);
+            box-shadow: var(--md-shadow-1);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-bar h1 {
+            font-size: 22px;
+            font-weight: 400;
+            color: var(--md-on-surface);
+            letter-spacing: 0.15px;
+        }
+
+        .app-bar-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Material Design 按钮 */
+        .md-button {
+            border: none;
+            border-radius: 20px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .md-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .md-button:hover::before {
+            width: 120px;
+            height: 120px;
+        }
+
+        .md-button-filled {
+            background-color: var(--md-primary);
+            color: white;
+            box-shadow: var(--md-shadow-1);
+        }
+
+        .md-button-filled:hover {
+            box-shadow: var(--md-shadow-2);
+            transform: translateY(-2px);
+        }
+
+        .md-button-outlined {
+            background-color: transparent;
+            color: var(--md-primary);
+            border: 1px solid var(--md-outline);
+        }
+
+        .md-button-outlined:hover {
+            background-color: var(--md-primary-container);
+            border-color: var(--md-primary);
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        /* 游戏容器 */
+        .game-container {
+            background-color: var(--md-surface);
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: var(--md-shadow-2);
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--md-primary), var(--md-secondary), var(--md-tertiary));
+            opacity: 0.3;
+        }
+
+        /* 游戏头部信息 */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            background-color: var(--md-surface-variant);
+            border-radius: 16px;
+        }
+
+        .game-info {
+            display: flex;
+            gap: 24px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--md-on-surface-variant);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--md-on-surface);
+        }
+
+        /* 游戏面板 */
+        .game-board {
+            display: grid;
+            gap: 4px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background-color: var(--md-surface);
+            border-radius: 16px;
+            box-shadow: var(--md-shadow-1);
+        }
+
+        /* 图块样式 */
+        .tile {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .tile::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .tile:hover::before {
+            width: 100px;
+            height: 100px;
+        }
+
+        .tile:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--md-shadow-2);
+        }
+
+        .tile.selected {
+            box-shadow: 0 0 0 3px var(--md-primary);
+            transform: scale(1.05);
+        }
+
+        .tile.matched {
+            animation: tileDisappear 0.5s ease-in-out forwards;
+        }
+
+        @keyframes tileDisappear {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2) rotate(180deg);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(0) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 连接线 */
+        .connection-line {
+            position: absolute;
+            background-color: var(--md-primary);
+            opacity: 0.8;
+            z-index: 10;
+            pointer-events: none;
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(103, 80, 164, 0.4);
+        }
+
+        /* 控制按钮组 */
+        .control-panel {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* 游戏完成对话框 */
+        .game-over-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .dialog-card {
+            background-color: var(--md-surface);
+            border-radius: 28px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: var(--md-shadow-4);
+            transform: scale(0.9);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .game-over-dialog.show .dialog-card {
+            transform: scale(1);
+        }
+
+        .dialog-title {
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 16px;
+            color: var(--md-on-surface);
+        }
+
+        .dialog-content {
+            color: var(--md-on-surface-variant);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .dialog-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        /* 主题切换器 */
+        .theme-toggle {
+            display: flex;
+            gap: 8px;
+        }
+
+        .theme-option {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .theme-option:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-option.selected {
+            border-color: var(--md-primary);
+            box-shadow: 0 0 0 2px var(--md-primary-container);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .app-bar {
+                padding: 12px 16px;
+            }
+
+            .game-header {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .game-container {
+                padding: 16px;
+                border-radius: 24px;
+            }
+
+            .control-panel {
+                flex-direction: column;
+            }
+
+            .md-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部应用栏 -->
+    <header class="app-bar">
+        <h1>连连看</h1>
+        <div class="app-bar-actions">
+            <button class="md-button md-button-outlined" onclick="toggleTheme()">
+                <span>🎨</span> 主题
+            </button>
+            <button class="md-button md-button-outlined" onclick="showHelp()">
+                <span>❓</span> 帮助
+            </button>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <div class="game-container slide-in">
+            <!-- 游戏头部信息 -->
+            <div class="game-header">
+                <div class="game-info">
+                    <div class="info-item">
+                        <span class="info-label">时间</span>
+                        <span class="info-value" id="timer">00:00</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">得分</span>
+                        <span class="info-value" id="score">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">剩余</span>
+                        <span class="info-value" id="remaining">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">连击</span>
+                        <span class="info-value" id="combo">0</span>
+                    </div>
+                </div>
+                <div class="theme-toggle">
+                    <div class="theme-option selected" style="background: linear-gradient(45deg, #6750A4, #625B71)" onclick="setTheme('default')"></div>
+                    <div class="theme-option" style="background: linear-gradient(45deg, #006874, #4A626D)" onclick="setTheme('ocean')"></div>
+                    <div class="theme-option" style="background: linear-gradient(45deg, #6E4A16, #7D5260)" onclick="setTheme('sunset')"></div>
+                </div>
+            </div>
+
+            <!-- 游戏面板 -->
+            <div id="gameBoard" class="game-board"></div>
+
+            <!-- 控制按钮组 -->
+            <div class="control-panel">
+                <button class="md-button md-button-outlined" onclick="shuffleTiles()">
+                    <span>🔄</span> 重排
+                </button>
+                <button class="md-button md-button-outlined" onclick="getHint()">
+                    <span>💡</span> 提示
+                </button>
+                <button class="md-button md-button-filled" onclick="newGame()">
+                    新游戏
+                </button>
+                <button class="md-button md-button-outlined" onclick="pauseGame()">
+                    <span>⏸️</span> 暂停
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 游戏完成对话框 -->
+    <div class="game-over-dialog" id="gameCompleteDialog">
+        <div class="dialog-card">
+            <h2 class="dialog-title">🎉 恭喜完成！</h2>
+            <div class="dialog-content">
+                <p>最终得分: <strong id="finalScore">0</strong></p>
+                <p>用时: <strong id="finalTime">00:00</strong></p>
+                <p>连击数: <strong id="finalCombo">0</strong></p>
+                <p>评价: <strong id="rating">⭐⭐⭐⭐⭐</strong></p>
+            </div>
+            <div class="dialog-actions">
+                <button class="md-button md-button-outlined" onclick="closeDialog()">关闭</button>
+                <button class="md-button md-button-filled" onclick="newGame()">再玩一次</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 帮助对话框 -->
+    <div class="game-over-dialog" id="helpDialog">
+        <div class="dialog-card">
+            <h2 class="dialog-title">游戏说明</h2>
+            <div class="dialog-content">
+                <p><strong>目标：</strong>消除所有相同的图案对</p>
+                <p><strong>规则：</strong></p>
+                <ul style="margin-left: 20px; color: var(--md-on-surface-variant);">
+                    <li>点击两个相同的图案</li>
+                    <li>连接路径不超过2个转折</li>
+                    <li>路径不能穿过其他图案</li>
+                    <li>连击可获得额外分数</li>
+                </ul>
+                <p><strong>操作：</strong></p>
+                <ul style="margin-left: 20px; color: var(--md-on-surface-variant);">
+                    <li>点击图案进行选择</li>
+                    <li>使用提示功能寻找可连接对</li>
+                    <li>重排功能重新排列剩余图案</li>
+                </ul>
+            </div>
+            <div class="dialog-actions">
+                <button class="md-button md-button-filled" onclick="closeHelp()">知道了</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Material Design 3 色彩主题
+        const themes = {
+            default: {
+                primary: '#6750A4',
+                secondary: '#625B71',
+                tertiary: '#7D5260',
+                surface: '#FEFBFF',
+                background: '#FEFBFF',
+                onSurface: '#1D1B20'
+            },
+            ocean: {
+                primary: '#006874',
+                secondary: '#4A626D',
+                tertiary: '#006874',
+                surface: '#FEFBFF',
+                background: '#FEFBFF',
+                onSurface: '#1D1B20'
+            },
+            sunset: {
+                primary: '#6E4A16',
+                secondary: '#7D5260',
+                tertiary: '#6E4A16',
+                surface: '#FEFBFF',
+                background: '#FEFBFF',
+                onSurface: '#1D1B20'
+            }
+        };
+
+        let currentTheme = 'default';
+        let gameBoard = [];
+        let selectedTiles = [];
+        let score = 0;
+        let remaining = 0;
+        let combo = 0;
+        let timer = 0;
+        let timerInterval = null;
+        let isPaused = false;
+        let boardWidth = 10;
+        let boardHeight = 8;
+        let tileTypes = 20; // 图案种类数量
+
+        // 图标库
+        const icons = [
+            '🍎', '🍌', '🍇', '🍓', '🍒', '🍑', '🥝', '🍋', '🍊', '🍉',
+            '🥥', '🍍', '🥭', '🍈', '🍐', '🍏', '🍅', '🥕', '🌽', '🥒',
+            '🥬', '🥦', '🍄', '🥜', '🌰', '🍞', '🥐', '🥖', '🥨', '🧀',
+            '🥚', '🍳', '🥞', '🥓', '🍔', '🍕', '🌭', '🥪', '🌮', '🌯',
+            '🥙', '🍖', '🍗', '🥩', '🍠', '🍙', '🍚', '🍜', '🍝', '🍠'
+        ];
+
+        // 初始化游戏
+        function init() {
+            setupTheme();
+            newGame();
+            setupEventListeners();
+        }
+
+        // 设置主题
+        function setupTheme() {
+            applyTheme(currentTheme);
+        }
+
+        // 应用主题
+        function applyTheme(themeName) {
+            const theme = themes[themeName];
+            document.body.style.setProperty('--md-primary', theme.primary);
+            document.body.style.setProperty('--md-secondary', theme.secondary);
+            document.body.style.setProperty('--md-tertiary', theme.tertiary);
+            document.body.style.setProperty('--md-surface', theme.surface);
+            document.body.style.setProperty('--md-background', theme.background);
+            document.body.style.setProperty('--md-on-surface', theme.onSurface);
+        }
+
+        // 设置主题
+        function setTheme(themeName) {
+            currentTheme = themeName;
+            applyTheme(themeName);
+            
+            // 更新主题选择器UI
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        // 新游戏
+        function newGame() {
+            clearInterval(timerInterval);
+            timer = 0;
+            score = 0;
+            combo = 0;
+            selectedTiles = [];
+            isPaused = false;
+            
+            createBoard();
+            updateUI();
+            startTimer();
+        }
+
+        // 创建游戏板
+        function createBoard() {
+            const totalTiles = boardWidth * boardHeight;
+            const pairsNeeded = totalTiles / 2;
+            
+            // 创建图案数组
+            let tileData = [];
+            for (let i = 0; i < pairsNeeded; i++) {
+                const icon = icons[i % icons.length];
+                tileData.push(icon, icon);
+            }
+            
+            // 打乱数组
+            tileData = shuffleArray(tileData);
+            
+            // 创建二维数组
+            gameBoard = [];
+            let index = 0;
+            for (let y = 0; y < boardHeight; y++) {
+                gameBoard[y] = [];
+                for (let x = 0; x < boardWidth; x++) {
+                    gameBoard[y][x] = {
+                        icon: tileData[index],
+                        matched: false,
+                        id: `${x}-${y}`
+                    };
+                    index++;
+                }
+            }
+            
+            remaining = pairsNeeded;
+            renderBoard();
+        }
+
+        // 打乱数组
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // 渲染游戏板
+        function renderBoard() {
+            const boardElement = document.getElementById('gameBoard');
+            boardElement.innerHTML = '';
+            boardElement.style.gridTemplateColumns = `repeat(${boardWidth}, 1fr)`;
+            boardElement.style.gridTemplateRows = `repeat(${boardHeight}, 1fr)`;
+            
+            for (let y = 0; y < boardHeight; y++) {
+                for (let x = 0; x < boardWidth; x++) {
+                    const tile = gameBoard[y][x];
+                    const tileElement = document.createElement('div');
+                    tileElement.className = 'tile';
+                    tileElement.id = tile.id;
+                    tileElement.textContent = tile.matched ? '' : tile.icon;
+                    tileElement.style.opacity = tile.matched ? '0' : '1';
+                    tileElement.style.pointerEvents = tile.matched ? 'none' : 'auto';
+                    
+                    // 设置图块颜色
+                    const hue = (tile.icon.charCodeAt(0) * 10) % 360;
+                    tileElement.style.background = `linear-gradient(135deg, 
+                        hsl(${hue}, 70%, 85%), 
+                        hsl(${hue}, 70%, 80%))`;
+                    tileElement.style.color = `hsl(${hue}, 70%, 40%)`;
+                    
+                    tileElement.addEventListener('click', () => selectTile(x, y));
+                    boardElement.appendChild(tileElement);
+                }
+            }
+        }
+
+        // 选择图块
+        function selectTile(x, y) {
+            if (isPaused) return;
+            
+            const tile = gameBoard[y][x];
+            if (tile.matched) return;
+            
+            const tileElement = document.getElementById(tile.id);
+            
+            // 如果点击已选中的图块，取消选择
+            if (selectedTiles.length === 1 && selectedTiles[0].x === x && selectedTiles[0].y === y) {
+                tileElement.classList.remove('selected');
+                selectedTiles = [];
+                return;
+            }
+            
+            // 如果已选择两个图块，清除选择
+            if (selectedTiles.length === 2) {
+                clearSelection();
+            }
+            
+            // 选择当前图块
+            tileElement.classList.add('selected');
+            selectedTiles.push({x, y, element: tileElement});
+            
+            // 如果选择了两个图块，检查是否匹配
+            if (selectedTiles.length === 2) {
+                setTimeout(() => checkMatch(), 300);
+            }
+        }
+
+        // 检查匹配
+        function checkMatch() {
+            const [tile1, tile2] = selectedTiles;
+            const icon1 = gameBoard[tile1.y][tile1.x].icon;
+            const icon2 = gameBoard[tile2.y][tile2.x].icon;
+            
+            if (icon1 === icon2 && canConnect(tile1, tile2)) {
+                // 匹配成功
+                matchTiles();
+            } else {
+                // 匹配失败
+                clearSelection();
+            }
+        }
+
+        // 检查两个图块是否可以连接
+        function canConnect(tile1, tile2) {
+            // 直线连接检查
+            if (checkDirectConnection(tile1, tile2)) return true;
+            
+            // 一个转弯连接检查
+            if (checkOneCornerConnection(tile1, tile2)) return true;
+            
+            // 两个转弯连接检查
+            if (checkTwoCornerConnection(tile1, tile2)) return true;
+            
+            return false;
+        }
+
+        // 检查直线连接
+        function checkDirectConnection(tile1, tile2) {
+            if (tile1.x === tile2.x) {
+                // 垂直连接
+                const minY = Math.min(tile1.y, tile2.y);
+                const maxY = Math.max(tile1.y, tile2.y);
+                for (let y = minY + 1; y < maxY; y++) {
+                    if (!gameBoard[y][tile1.x].matched) return false;
+                }
+                return true;
+            } else if (tile1.y === tile2.y) {
+                // 水平连接
+                const minX = Math.min(tile1.x, tile2.x);
+                const maxX = Math.max(tile1.x, tile2.x);
+                for (let x = minX + 1; x < maxX; x++) {
+                    if (!gameBoard[tile1.y][x].matched) return false;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        // 检查一个转弯连接
+        function checkOneCornerConnection(tile1, tile2) {
+            // 尝试两个可能的转折点
+            const corner1 = {x: tile1.x, y: tile2.y};
+            const corner2 = {x: tile2.x, y: tile1.y};
+            
+            // 检查转折点1
+            if (gameBoard[corner1.y][corner1.x].matched &&
+                checkDirectConnection(tile1, corner1) &&
+                checkDirectConnection(corner1, tile2)) {
+                return true;
+            }
+            
+            // 检查转折点2
+            if (gameBoard[corner2.y][corner2.x].matched &&
+                checkDirectConnection(tile1, corner2) &&
+                checkDirectConnection(corner2, tile2)) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        // 检查两个转弯连接
+        function checkTwoCornerConnection(tile1, tile2) {
+            // 扩展边界以包含虚拟边界
+            const expandedBoard = createExpandedBoard();
+            
+            // 使用BFS寻找路径
+            return findPathWithBFS(expandedBoard, tile1, tile2);
+        }
+
+        // 创建扩展的游戏板（包含边界）
+        function createExpandedBoard() {
+            const expanded = [];
+            const height = boardHeight + 2;
+            const width = boardWidth + 2;
+            
+            // 初始化扩展板
+            for (let y = 0; y < height; y++) {
+                expanded[y] = [];
+                for (let x = 0; x < width; x++) {
+                    expanded[y][x] = true; // 边界都是空的
+                }
+            }
+            
+            // 复制游戏数据
+            for (let y = 0; y < boardHeight; y++) {
+                for (let x = 0; x < boardWidth; x++) {
+                    expanded[y + 1][x + 1] = gameBoard[y][x].matched;
+                }
+            }
+            
+            return expanded;
+        }
+
+        // 使用BFS寻找路径
+        function findPathWithBFS(expandedBoard, start, end) {
+            const startX = start.x + 1;
+            const startY = start.y + 1;
+            const endX = end.x + 1;
+            const endY = end.y + 1;
+            
+            const directions = [
+                {dx: 0, dy: -1}, // 上
+                {dx: 1, dy: 0},  // 右
+                {dx: 0, dy: 1},  // 下
+                {dx: -1, dy: 0}  // 左
+            ];
+            
+            // BFS搜索
+            const queue = [{x: startX, y: startY, corners: 0}];
+            const visited = new Set();
+            visited.add(`${startX}-${startY}-0`);
+            
+            while (queue.length > 0) {
+                const current = queue.shift();
+                
+                if (current.x === endX && current.y === endY && current.corners <= 2) {
+                    return true;
+                }
+                
+                if (current.corners > 2) continue;
+                
+                // 向四个方向扩展
+                for (const dir of directions) {
+                    let newX = current.x;
+                    let newY = current.y;
+                    let newCorners = current.corners;
+                    let lastDir = null;
+                    
+                    // 沿直线前进直到遇到障碍或边界
+                    while (true) {
+                        newX += dir.dx;
+                        newY += dir.dy;
+                        
+                        // 检查边界
+                        if (newX < 0 || newX >= expandedBoard[0].length || 
+                            newY < 0 || newY >= expandedBoard.length) {
+                            break;
+                        }
+                        
+                        // 检查是否可通行
+                        if (!expandedBoard[newY][newX] && 
+                            !(newX === endX && newY === endY)) {
+                            break;
+                        }
+                        
+                        // 计算转折点
+                        if (lastDir !== null && lastDir !== dir) {
+                            newCorners++;
+                        }
+                        lastDir = dir;
+                        
+                        // 检查是否到达终点
+                        if (newX === endX && newY === endY) {
+                            if (newCorners <= 2) {
+                                return true;
+                            }
+                            break;
+                        }
+                        
+                        // 检查是否已访问过这个状态
+                        const state = `${newX}-${newY}-${newCorners}`;
+                        if (visited.has(state)) {
+                            continue;
+                        }
+                        visited.add(state);
+                        
+                        if (newCorners <= 2) {
+                            queue.push({x: newX, y: newY, corners: newCorners});
+                        }
+                    }
+                }
+            }
+            
+            return false;
+        }
+
+        // 匹配图块
+        function matchTiles() {
+            const [tile1, tile2] = selectedTiles;
+            
+            // 标记为已匹配
+            gameBoard[tile1.y][tile1.x].matched = true;
+            gameBoard[tile2.y][tile2.x].matched = true;
+            
+            // 添加消失动画
+            tile1.element.classList.add('matched');
+            tile2.element.classList.add('matched');
+            
+            // 更新分数
+            combo++;
+            const points = 100 * combo;
+            score += points;
+            remaining--;
+            
+            updateUI();
+            
+            // 清除选择
+            setTimeout(() => {
+                clearSelection();
+                
+                // 检查游戏是否完成
+                if (remaining === 0) {
+                    gameComplete();
+                }
+            }, 500);
+        }
+
+        // 清除选择
+        function clearSelection() {
+            selectedTiles.forEach(tile => {
+                tile.element.classList.remove('selected');
+            });
+            selectedTiles = [];
+        }
+
+        // 重排图块
+        function shuffleTiles() {
+            if (isPaused || remaining === 0) return;
+            
+            // 收集未匹配的图块
+            const unmatchedTiles = [];
+            for (let y = 0; y < boardHeight; y++) {
+                for (let x = 0; x < boardWidth; x++) {
+                    if (!gameBoard[y][x].matched) {
+                        unmatchedTiles.push(gameBoard[y][x].icon);
+                    }
+                }
+            }
+            
+            // 打乱数组
+            const shuffledTiles = shuffleArray(unmatchedTiles);
+            
+            // 重新分配
+            let index = 0;
+            for (let y = 0; y < boardHeight; y++) {
+                for (let x = 0; x < boardWidth; x++) {
+                    if (!gameBoard[y][x].matched) {
+                        gameBoard[y][x].icon = shuffledTiles[index];
+                        index++;
+                    }
+                }
+            }
+            
+            clearSelection();
+            renderBoard();
+            
+            // 扣分
+            score = Math.max(0, score - 50);
+            updateUI();
+        }
+
+        // 获取提示
+        function getHint() {
+            if (isPaused || remaining === 0) return;
+            
+            // 寻找可连接的图块对
+            for (let y1 = 0; y1 < boardHeight; y1++) {
+                for (let x1 = 0; x1 < boardWidth; x1++) {
+                    if (gameBoard[y1][x1].matched) continue;
+                    
+                    for (let y2 = 0; y2 < boardHeight; y2++) {
+                        for (let x2 = 0; x2 < boardWidth; x2++) {
+                            if (x1 === x2 && y1 === y2) continue;
+                            if (gameBoard[y2][x2].matched) continue;
+                            
+                            if (gameBoard[y1][x1].icon === gameBoard[y2][x2].icon &&
+                                canConnect({x: x1, y: y1}, {x: x2, y: y2})) {
+                                
+                                // 高亮显示提示
+                                const tile1 = document.getElementById(`${x1}-${y1}`);
+                                const tile2 = document.getElementById(`${x2}-${y2}`);
+                                
+                                tile1.classList.add('pulse');
+                                tile2.classList.add('pulse');
+                                
+                                setTimeout(() => {
+                                    tile1.classList.remove('pulse');
+                                    tile2.classList.remove('pulse');
+                                }, 1000);
+                                
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            alert('没有找到可连接的图块对！');
+        }
+
+        // 暂停游戏
+        function pauseGame() {
+            if (remaining === 0) return;
+            
+            isPaused = !isPaused;
+            const button = event.target;
+            
+            if (isPaused) {
+                clearInterval(timerInterval);
+                button.innerHTML = '<span>▶️</span> 继续';
+            } else {
+                startTimer();
+                button.innerHTML = '<span>⏸️</span> 暂停';
+            }
+        }
+
+        // 计时器
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timer++;
+                updateTimer();
+            }, 1000);
+        }
+
+        // 更新计时器显示
+        function updateTimer() {
+            const minutes = Math.floor(timer / 60);
+            const seconds = timer % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // 更新UI
+        function updateUI() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('remaining').textContent = remaining;
+            document.getElementById('combo').textContent = combo;
+        }
+
+        // 游戏完成
+        function gameComplete() {
+            clearInterval(timerInterval);
+            
+            const minutes = Math.floor(timer / 60);
+            const seconds = timer % 60;
+            const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // 计算评分
+            let rating = '⭐';
+            if (score > 5000) rating = '⭐⭐⭐⭐⭐';
+            else if (score > 3000) rating = '⭐⭐⭐⭐';
+            else if (score > 2000) rating = '⭐⭐⭐';
+            else if (score > 1000) rating = '⭐⭐';
+            
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalTime').textContent = timeStr;
+            document.getElementById('finalCombo').textContent = combo;
+            document.getElementById('rating').textContent = rating;
+            
+            const dialog = document.getElementById('gameCompleteDialog');
+            dialog.classList.add('show');
+            dialog.style.display = 'flex';
+        }
+
+        // 关闭对话框
+        function closeDialog() {
+            const dialogs = document.querySelectorAll('.game-over-dialog');
+            dialogs.forEach(dialog => {
+                dialog.classList.remove('show');
+                dialog.style.display = 'none';
+            });
+        }
+
+        // 显示帮助
+        function showHelp() {
+            const dialog = document.getElementById('helpDialog');
+            dialog.classList.add('show');
+            dialog.style.display = 'flex';
+        }
+
+        // 关闭帮助
+        function closeHelp() {
+            closeDialog();
+        }
+
+        // 切换主题
+        function toggleTheme() {
+            const themeNames = Object.keys(themes);
+            const currentIndex = themeNames.indexOf(currentTheme);
+            const nextIndex = (currentIndex + 1) % themeNames.length;
+            currentTheme = themeNames[nextIndex];
+            
+            applyTheme(currentTheme);
+            
+            // 更新主题选择器UI
+            document.querySelectorAll('.theme-option').forEach((option, index) => {
+                option.classList.toggle('selected', index === nextIndex);
+            });
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 键盘控制
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'h' || e.key === 'H') {
+                    getHint();
+                } else if (e.key === 's' || e.key === 'S') {
+                    shuffleTiles();
+                } else if (e.key === 'p' || e.key === 'P') {
+                    pauseGame();
+                } else if (e.key === 'n' || e.key === 'N') {
+                    newGame();
+                }
+            });
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>

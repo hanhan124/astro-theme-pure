@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验室智能助手 - 最终版</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+            box-sizing: border-box;
+        }
+        h1 {
+            text-align: center;
+            color: #1a73e8;
+            margin-bottom: 25px;
+        }
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .tab-button {
+            background-color: #f0f2f5;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #5f6368;
+            border-radius: 8px 8px 0 0;
+            margin: 0 5px;
+            font-weight: 500;
+        }
+        .tab-button:hover {
+            background-color: #e8eaed;
+        }
+        .tab-button.active {
+            background-color: #1a73e8;
+            color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+            padding-top: 20px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #5f6368;
+            display: block;
+        }
+        .input-with-unit {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+        .input-with-unit:focus-within {
+            border-color: #1a73e8;
+        }
+        .input-with-unit input {
+            flex-grow: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            outline: none;
+        }
+        .input-with-unit select {
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            background-color: #f8f9fa;
+            outline: none;
+            cursor: pointer;
+        }
+        .formula-group {
+            display: flex;
+            align-items: center;
+        }
+        .formula-group input {
+            flex-grow: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .formula-group input:focus {
+            border-color: #1a73e8;
+        }
+        .formula-group button {
+            margin-left: 10px;
+            padding: 12px 15px;
+            background-color: #4285f4;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .formula-group button:hover {
+            background-color: #3367d6;
+        }
+        button.calculate-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            background-color: #1a73e8;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: 600;
+        }
+        button.calculate-btn:hover {
+            background-color: #1669c5;
+        }
+        .result-box {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e8f0fe;
+            border: 1px solid #c5d8f9;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        .result-box.error {
+            background-color: #ffebee;
+            border-color: #f44336;
+            color: #f44336;
+        }
+        .result-box.warning {
+            background-color: #fff3e0;
+            border-color: #ff9800;
+            color: #ff9800;
+        }
+        .result-box h3 {
+            margin: 0 0 10px 0;
+            color: #1a73e8;
+        }
+        .note {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 15px;
+        }
+        ul.steps, ol.steps {
+            padding-left: 20px;
+        }
+        .safety-tip {
+            color: #f44336;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>实验室智能助手 - 最终版</h1>
+
+    <div class="tab-container">
+        <button class="tab-button active" data-tab="universal">通用计算</button>
+        <button class="tab-button" data-tab="dilution">稀释计算</button>
+        <button class="tab-button" data-tab="make-solution">配制溶液</button>
+    </div>
+
+    <div id="universal" class="tab-content active">
+        <p class="note">智能识别: 请只填写您已知的数值，留空一个要计算的量。</p>
+        <div class="input-group">
+            <label for="universal-molarity">摩尔浓度 (C)</label>
+            <div class="input-with-unit">
+                <input type="text" id="universal-molarity" placeholder="如 2.5 或 2.5e-3">
+                <select id="universal-molarity-unit"></select>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="universal-volume">溶液体积 (V)</label>
+            <div class="input-with-unit">
+                <input type="text" id="universal-volume" placeholder="如 500">
+                <select id="universal-volume-unit"></select>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="universal-mass">溶质质量 (m)</label>
+            <div class="input-with-unit">
+                <input type="text" id="universal-mass" placeholder="如 5.844">
+                <select id="universal-mass-unit"></select>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="universal-molar-mass">摩尔质量 (M)</label>
+            <div class="formula-group">
+                <input type="text" id="universal-molar-mass" placeholder="自动填充或手动输入">
+                <input type="text" id="universal-formula" placeholder="或输入化学式 如 NaCl">
+                <button onclick="calculateMolarMass('universal')">自动计算</button>
+            </div>
+        </div>
+        <button class="calculate-btn" onclick="calculateUniversal()">计算</button>
+    </div>
+
+    <div id="dilution" class="tab-content">
+        <p class="note">请只填写三个已知值来计算第四个未知值。</p>
+        <div class="input-group">
+            <label for="dilution-c1">初始浓度 (C1)</label>
+            <div class="input-with-unit">
+                <input type="text" id="dilution-c1" placeholder="如 2">
+                <select id="dilution-c1-unit"></select>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="dilution-v1">初始体积 (V1)</label>
+            <div class="input-with-unit">
+                <input type="text" id="dilution-v1" placeholder="如 100">
+                <select id="dilution-v1-unit"></select>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="dilution-c2">稀释后浓度 (C2)</label>
+            <div class="input-with-unit">
+                <input type="text" id="dilution-c2" placeholder="如 0.5">
+                <select id="dilution-c2-unit"></select>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="dilution-v2">稀释后体积 (V2)</label>
+            <div class="input-with-unit">
+                <input type="text" id="dilution-v2" placeholder="如 500">
+                <select id="dilution-v2-unit"></select>
+            </div>
+        </div>
+        <button class="calculate-btn" onclick="calculateDilution()">计算</button>
+    </div>
+
+    <div id="make-solution" class="tab-content">
+        <p class="note">根据目标浓度和体积，计算所需溶质质量并生成智能配制步骤。</p>
+        <div class="input-group">
+            <label for="make-formula">溶质化学式 (如 NaCl, H₂SO₄)</label>
+            <div class="formula-group">
+                <input type="text" id="make-formula" placeholder="输入化学式">
+                <button onclick="calculateMolarMass('make')">自动计算</button>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="make-molar-mass">摩尔质量 (M)</label>
+            <div class="input-with-unit">
+                <input type="text" id="make-molar-mass" placeholder="自动填充或手动输入">
+                <span style="margin-left:10px;">g/mol</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="make-c">目标浓度 (C)</label>
+            <div class="input-with-unit">
+                <input type="text" id="make-c" placeholder="如 1.5">
+                <select id="make-c-unit"></select>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="make-v">目标体积 (V)</label>
+            <div class="input-with-unit">
+                <input type="text" id="make-v" placeholder="如 250">
+                <select id="make-v-unit"></select>
+            </div>
+        </div>
+        <button class="calculate-btn" onclick="calculateMakeSolution()">计算并生成步骤</button>
+    </div>
+
+    <div id="result" class="result-box">
+        <h3>计算结果</h3>
+        <p>结果和智能建议会显示在这里。</p>
+    </div>
+</div>
+
+<script>
+    // 定义单位和转换系数，以及默认排序
+    const UNITS = {
+        'volume': [
+            { name: 'mL', value: 1e-3, default: true },
+            { name: 'L', value: 1 },
+            { name: 'uL', value: 1e-6 },
+            { name: 'nL', value: 1e-9 },
+            { name: 'pL', value: 1e-12 },
+            { name: 'fL', value: 1e-15 },
+            { name: 'cm³', value: 1e-3 },
+        ],
+        'molarity': [
+            { name: 'M', value: 1, default: true },
+            { name: 'mM', value: 1e-3 },
+            { name: 'uM', value: 1e-6 },
+            { name: 'nM', value: 1e-9 },
+            { name: 'pM', value: 1e-12 },
+            { name: 'fM', value: 1e-15 },
+        ],
+        'mass': [
+            { name: 'g', value: 1, default: true },
+            { name: 'mg', value: 1e-3 },
+            { name: 'ug', value: 1e-6 },
+            { name: 'ng', value: 1e-9 },
+            { name: 'pg', value: 1e-12 },
+            { name: 'fg', value: 1e-15 },
+            { name: 'kg', value: 1e3 },
+        ]
+    };
+
+    // 元素周期表数据，用于摩尔质量计算
+    const ATOMIC_WEIGHTS = {
+        'H': 1.008, 'He': 4.0026, 'Li': 6.94, 'Be': 9.0122, 'B': 10.81, 'C': 12.011, 'N': 14.007, 'O': 15.999, 'F': 18.998, 'Ne': 20.180, 'Na': 22.990, 'Mg': 24.305, 'Al': 26.982, 'Si': 28.085, 'P': 30.974, 'S': 32.06, 'Cl': 35.45, 'K': 39.098, 'Ar': 39.948, 'Ca': 40.078, 'Sc': 44.956, 'Ti': 47.867, 'V': 50.942, 'Cr': 51.996, 'Mn': 54.938, 'Fe': 55.845, 'Co': 58.933, 'Ni': 58.693, 'Cu': 63.546, 'Zn': 65.38, 'Ga': 69.723, 'Ge': 72.63, 'As': 74.922, 'Se': 78.971, 'Br': 79.904, 'Kr': 83.798, 'Rb': 85.468, 'Sr': 87.62, 'Y': 88.906, 'Zr': 91.224, 'Nb': 92.906, 'Mo': 95.95, 'Tc': 98, 'Ru': 101.07, 'Rh': 102.91, 'Pd': 106.42, 'Ag': 107.87, 'Cd': 112.41, 'In': 114.82, 'Sn': 118.71, 'Sb': 121.76, 'I': 126.90, 'Te': 127.60, 'Xe': 131.29, 'Cs': 132.91, 'Ba': 137.33, 'La': 138.91, 'Ce': 140.12, 'Pr': 140.91, 'Nd': 144.24, 'Pm': 145, 'Sm': 150.36, 'Eu': 151.96, 'Gd': 157.25, 'Tb': 158.93, 'Dy': 162.50, 'Ho': 164.93, 'Er': 167.26, 'Tm': 168.93, 'Yb': 173.05, 'Lu': 174.97, 'Hf': 178.49, 'Ta': 180.95, 'W': 183.84, 'Re': 186.21, 'Os': 190.23, 'Ir': 192.22, 'Pt': 195.08, 'Au': 196.97, 'Hg': 200.59, 'Tl': 204.38, 'Pb': 207.2, 'Bi': 208.98, 'Po': 209, 'At': 210, 'Rn': 222, 'Fr': 223, 'Ra': 226, 'Ac': 227, 'Pa': 231.04, 'Th': 232.04, 'Np': 237, 'U': 238.03, 'Am': 243, 'Pu': 244, 'Cm': 247, 'Bk': 247, 'Cf': 251, 'Es': 252, 'Fm': 257, 'Md': 258, 'No': 259, 'Lr': 266, 'Rf': 267, 'Db': 268, 'Sg': 269, 'Bh': 270, 'Hs': 269, 'Mt': 278, 'Ds': 281, 'Rg': 282, 'Cn': 285, 'Nh': 286, 'Fl': 289, 'Mc': 289, 'Lv': 293, 'Ts': 294, 'Og': 294
+    };
+
+    // 溶质属性与建议
+    const SOLUTE_PROPERTIES = {
+        'H2SO4': { type: 'strong_acid', warnings: '极强腐蚀性，稀释时会剧烈放热。', solvent: '去离子水', temp: '冰浴或常温' },
+        'HCl': { type: 'strong_acid', warnings: '极强腐蚀性，具有挥发性。', solvent: '去离子水', temp: '常温' },
+        'NaOH': { type: 'strong_base', warnings: '极强腐蚀性，稀释时放热，易潮解。', solvent: '去离子水', temp: '冰浴或常温' },
+        'NaCl': { type: 'salt', warnings: '', solvent: '去离子水', temp: '常温' },
+        'C12H22O11': { type: 'sugar', warnings: '', solvent: '去离子水', temp: '常温' },
+        'CH3COONa': { type: 'buffer', warnings: '', solvent: '去离子水', temp: '常温' },
+        'EDTA': { type: 'other', warnings: 'EDTA溶解于水时需要调节pH值至8.0左右。', solvent: '去离子水', temp: '加热溶解' },
+        'DNA': { type: 'biological', warnings: 'DNA溶解需在适当的缓冲液中。', solvent: 'TE缓冲液或去离子水', temp: '常温，缓慢振荡' },
+    };
+
+    // --- 核心函数库 ---
+
+    function parseInput(inputStr) {
+        if (!inputStr) return null;
+        // 支持科学计数法
+        const value = parseFloat(inputStr.trim());
+        return isNaN(value) ? null : value;
+    }
+
+    function parseFormula(formula) {
+        const regex = /([A-Z][a-z]*)(\d*)/g;
+        let match;
+        let molarMass = 0;
+        let valid = true;
+        while ((match = regex.exec(formula)) !== null) {
+            const element = match[1];
+            const count = parseInt(match[2] || '1');
+            if (ATOMIC_WEIGHTS[element]) {
+                molarMass += ATOMIC_WEIGHTS[element] * count;
+            } else {
+                valid = false;
+                break;
+            }
+        }
+        return valid ? molarMass : null;
+    }
+    
+    function formatResult(value, type) {
+        let bestUnit = '';
+        let bestValue = value;
+        const units = UNITS[type];
+        
+        // Find the most appropriate unit
+        for (const unit of units) {
+            if (value >= unit.value * 0.1 || value === 0) {
+                 bestUnit = unit.name;
+                 bestValue = value / unit.value;
+                 break;
+            }
+        }
+        
+        // Use scientific notation for very small or very large numbers
+        if (Math.abs(bestValue) > 1e4 || (Math.abs(bestValue) > 0 && Math.abs(bestValue) < 1e-3)) {
+            return { value: bestValue.toExponential(3), unit: bestUnit };
+        } else {
+            return { value: bestValue.toFixed(4), unit: bestUnit };
+        }
+    }
+
+    // --- DOM操作与事件绑定 ---
+
+    function populateUnitSelects() {
+        document.querySelectorAll('select').forEach(select => {
+            select.innerHTML = '';
+            const type = select.id.includes('volume') ? 'volume' : (select.id.includes('molarity') ? 'molarity' : (select.id.includes('mass') ? 'mass' : null));
+            if (type) {
+                UNITS[type].forEach(unit => {
+                    const option = document.createElement('option');
+                    option.value = unit.value;
+                    option.textContent = unit.name;
+                    if (unit.default) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        populateUnitSelects();
+        
+        const tabs = document.querySelectorAll('.tab-button');
+        const contents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                contents.forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                const targetTab = document.getElementById(tab.dataset.tab);
+                targetTab.classList.add('active');
+                clearInputs();
+                displayResult('请填写已知值，然后点击计算。', false);
+            });
+        });
+    });
+
+    function getInputValue(id, isUnit = false) {
+        const element = document.getElementById(id);
+        if (!element) return null;
+        if (isUnit) return parseInput(element.value);
+        return parseInput(element.value);
+    }
+
+    function displayResult(message, isError = false, isWarning = false) {
+        const resultBox = document.getElementById('result');
+        const h3 = resultBox.querySelector('h3');
+        const p = resultBox.querySelector('p');
+        
+        resultBox.classList.toggle('error', isError);
+        resultBox.classList.toggle('warning', isWarning);
+        h3.textContent = isError ? '计算失败' : (isWarning ? '安全警告' : '计算结果');
+        p.innerHTML = message;
+    }
+    
+    function clearInputs() {
+        document.querySelectorAll('input').forEach(input => input.value = '');
+    }
+
+    // --- 核心计算逻辑 ---
+
+    function calculateMolarMass(tabId) {
+        const formulaInput = document.getElementById(`${tabId}-formula`);
+        const molarMassInput = document.getElementById(`${tabId}-molar-mass`);
+        const formula = formulaInput.value.replace(/\s/g, '').trim();
+        if (!formula) {
+            displayResult('请输入化学式', true);
+            return;
+        }
+
+        const molarMass = parseFormula(formula);
+        if (molarMass) {
+            molarMassInput.value = molarMass.toFixed(4);
+            displayResult(`化学式 **${formula}** 的摩尔质量为 **${molarMass.toFixed(4)} g/mol**。`);
+        } else {
+            displayResult(`无法识别化学式 **${formula}**，请手动输入摩尔质量。`, true);
+        }
+    }
+
+    function calculateUniversal() {
+        const C_val = getInputValue('universal-molarity');
+        const V_val = getInputValue('universal-volume');
+        const m_val = getInputValue('universal-mass');
+        const M_val = getInputValue('universal-molar-mass');
+
+        const C_unit = getInputValue('universal-molarity-unit');
+        const V_unit = getInputValue('universal-volume-unit');
+        const m_unit = getInputValue('universal-mass-unit');
+
+        const C = C_val !== null ? C_val * C_unit : null;
+        const V = V_val !== null ? V_val * V_unit : null;
+        const m = m_val !== null ? m_val * m_unit : null;
+        const M = M_val !== null ? M_val : null;
+
+        const inputs = [C, V, m, M].filter(val => val !== null);
+        if (inputs.length !== 3) {
+            displayResult('请只留空一个未知量进行计算。', true);
+            return;
+        }
+
+        try {
+            let result;
+            if (C === null) {
+                result = m / (M * V);
+                const resultDisplay = formatResult(result, 'molarity');
+                displayResult(`摩尔浓度 (C): **${resultDisplay.value} ${resultDisplay.unit}**`);
+            } else if (V === null) {
+                result = m / (C * M);
+                const resultDisplay = formatResult(result, 'volume');
+                displayResult(`溶液体积 (V): **${resultDisplay.value} ${resultDisplay.unit}**`);
+            } else if (m === null) {
+                result = C * V * M;
+                const resultDisplay = formatResult(result, 'mass');
+                displayResult(`溶质质量 (m): **${resultDisplay.value} ${resultDisplay.unit}**`);
+            } else if (M === null) {
+                result = m / (C * V);
+                displayResult(`摩尔质量 (M): **${result.toFixed(4)} g/mol**`);
+            }
+        } catch (e) {
+            displayResult('计算失败。请检查输入是否有效。', true);
+        }
+    }
+
+    function calculateDilution() {
+        const c1_val = getInputValue('dilution-c1');
+        const v1_val = getInputValue('dilution-v1');
+        const c2_val = getInputValue('dilution-c2');
+        const v2_val = getInputValue('dilution-v2');
+
+        const c1_unit = getInputValue('dilution-c1-unit');
+        const v1_unit = getInputValue('dilution-v1-unit');
+        const c2_unit = getInputValue('dilution-c2-unit');
+        const v2_unit = getInputValue('dilution-v2-unit');
+
+        const c1 = c1_val !== null ? c1_val * c1_unit : null;
+        const v1 = v1_val !== null ? v1_val * v1_unit : null;
+        const c2 = c2_val !== null ? c2_val * c2_unit : null;
+        const v2 = v2_val !== null ? v2_val * v2_unit : null;
+
+        const inputs = [c1, v1, c2, v2].filter(val => val !== null);
+        if (inputs.length !== 3) {
+            displayResult('稀释计算需要三个已知量。', true);
+            return;
+        }
+
+        try {
+            let result;
+            if (c1 === null) {
+                result = (c2 * v2) / v1;
+                const resultDisplay = formatResult(result, 'molarity');
+                displayResult(`初始浓度 (C1): **${resultDisplay.value} ${resultDisplay.unit}**`);
+            } else if (v1 === null) {
+                result = (c2 * v2) / c1;
+                const resultDisplay = formatResult(result, 'volume');
+                displayResult(`初始体积 (V1): **${resultDisplay.value} ${resultDisplay.unit}**`);
+            } else if (c2 === null) {
+                result = (c1 * v1) / v2;
+                const resultDisplay = formatResult(result, 'molarity');
+                displayResult(`稀释后浓度 (C2): **${resultDisplay.value} ${resultDisplay.unit}**`);
+            } else if (v2 === null) {
+                result = (c1 * v1) / c2;
+                const resultDisplay = formatResult(result, 'volume');
+                displayResult(`稀释后体积 (V2): **${resultDisplay.value} ${resultDisplay.unit}**`);
+            }
+        } catch (e) {
+            displayResult('计算失败。请检查输入是否有效。', true);
+        }
+    }
+    
+    function calculateMakeSolution() {
+        const formula = document.getElementById('make-formula').value.replace(/\s/g, '').trim();
+        const M_val = getInputValue('make-molar-mass');
+        const C_val = getInputValue('make-c');
+        const V_val = getInputValue('make-v');
+
+        if (C_val === null || V_val === null || M_val === null) {
+            displayResult('请填写所有必需信息：化学式或摩尔质量、目标浓度、目标体积。', true);
+            return;
+        }
+        
+        const C = C_val * getInputValue('make-c-unit');
+        const V = V_val * getInputValue('make-v-unit');
+        const M = M_val;
+        
+        try {
+            const mass = C * V * M;
+            
+            const massDisplay = formatResult(mass, 'mass');
+            const volumeDisplay = formatResult(V, 'volume');
+            
+            const properties = SOLUTE_PROPERTIES[formula.toUpperCase()] || {};
+            
+            let resultHtml = `
+                <p><strong>所需溶质质量:</strong> <span style="color:#1a73e8; font-size:20px;">${massDisplay.value} ${massDisplay.unit}</span></p>
+                <p><strong>AI 智能配制步骤:</strong></p>
+                <ol class="steps">
+                    <li>精确称取 **${massDisplay.value} ${massDisplay.unit}** 溶质。${mass < 0.001 ? '（建议使用高精度电子天平或微量称重系统）' : ''}</li>
+                    <li>将其完全溶解在适量的溶剂中，并搅拌。</li>
+                    <li>将溶液小心转移至容量为 **${volumeDisplay.value} ${volumeDisplay.unit}** 的容量瓶中。${V < 0.001 ? '（建议使用微量移液器进行精确移液）' : ''}</li>
+                    <li>用洗瓶将烧杯壁和玻璃棒上的液体洗涤2-3次，将洗涤液一并转入容量瓶。</li>
+                    <li>加水至容量瓶刻度线，摇匀。</li>
+                </ol>
+            `;
+            
+            let safetyTip = '';
+            let solventTip = '';
+            
+            if (properties.type === 'strong_acid') {
+                safetyTip = '<li><span class="safety-tip">安全提示：</span> 对于浓酸稀释，请**务必将酸缓慢、分批地沿烧杯壁倒入水中**，并不断搅拌，切勿将水倒入酸中！</li>';
+            } else if (properties.type === 'strong_base') {
+                safetyTip = '<li><span class="safety-tip">安全提示：</span> 对于强碱溶解，会剧烈放热，请在通风橱中操作，并佩戴防护手套和护目镜。</li>';
+            } else if (properties.type === 'oxidizing_agent') {
+                safetyTip = '<li><span class="safety-tip">安全提示：</span> 该物质为强氧化剂，操作时请避免与还原剂或有机物接触。</li>';
+            }
+            
+            if (properties.solvent) {
+                solventTip += `<li><span style="font-weight:bold;">溶剂建议：</span> 使用**${properties.solvent}**作为溶剂。</li>`;
+            }
+            if (properties.temp) {
+                 solventTip += `<li><span style="font-weight:bold;">溶解温度：</span> 建议在**${properties.temp}**条件下溶解。</li>`;
+            }
+
+            if (safetyTip || solventTip) {
+                 resultHtml += `<ul class="steps">${safetyTip}${solventTip}</ul>`;
+                 displayResult(resultHtml, false, safetyTip !== '');
+            } else {
+                 displayResult(resultHtml);
+            }
+
+        } catch (e) {
+            displayResult('计算失败。请检查输入是否有效。', true);
+        }
+    }
+</script>
+
+</body>
+</html>

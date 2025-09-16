@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推箱子 - Material Design</title>
+    <style>
+        :root {
+            /* Material Design 3 色彩系统 */
+            --md-primary: #6750A4;
+            --md-primary-container: #EADDFF;
+            --md-secondary: #625B71;
+            --md-secondary-container: #E8DEF8;
+            --md-tertiary: #7D5260;
+            --md-tertiary-container: #FFD8E4;
+            --md-surface: #FEFBFF;
+            --md-surface-variant: #E7E0EC;
+            --md-background: #FEFBFF;
+            --md-on-surface: #1D1B20;
+            --md-on-surface-variant: #49454F;
+            --md-outline: #79747E;
+            --md-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --md-shadow-2: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+            --md-shadow-3: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.06);
+            --md-shadow-4: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--md-background);
+            color: var(--md-on-surface);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部应用栏 */
+        .app-bar {
+            background-color: var(--md-surface);
+            box-shadow: var(--md-shadow-1);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-bar h1 {
+            font-size: 22px;
+            font-weight: 400;
+            color: var(--md-on-surface);
+            letter-spacing: 0.15px;
+        }
+
+        /* Material Design 按钮 */
+        .md-button {
+            border: none;
+            border-radius: 20px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .md-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .md-button:hover::before {
+            width: 120px;
+            height: 120px;
+        }
+
+        .md-button-filled {
+            background-color: var(--md-primary);
+            color: white;
+            box-shadow: var(--md-shadow-1);
+        }
+
+        .md-button-filled:hover {
+            box-shadow: var(--md-shadow-2);
+            transform: translateY(-2px);
+        }
+
+        .md-button-outlined {
+            background-color: transparent;
+            color: var(--md-primary);
+            border: 1px solid var(--md-outline);
+        }
+
+        .md-button-outlined:hover {
+            background-color: var(--md-primary-container);
+            border-color: var(--md-primary);
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        /* 游戏容器 */
+        .game-container {
+            background-color: var(--md-surface);
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: var(--md-shadow-2);
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--md-primary), var(--md-secondary), var(--md-tertiary));
+            opacity: 0.3;
+        }
+
+        /* 游戏信息面板 */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            background-color: var(--md-surface-variant);
+            border-radius: 16px;
+        }
+
+        .level-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--md-on-surface-variant);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--md-on-surface);
+        }
+
+        /* 游戏画布 */
+        .game-board {
+            background-color: var(--md-surface);
+            border: 2px solid var(--md-surface-variant);
+            border-radius: 16px;
+            display: block;
+            margin: 0 auto 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--md-shadow-1);
+        }
+
+        .game-board:hover {
+            border-color: var(--md-primary);
+            box-shadow: 0 0 0 4px rgba(103, 80, 164, 0.1), var(--md-shadow-2);
+        }
+
+        /* 控制按钮组 */
+        .control-panel {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* 移动控制按钮 */
+        .movement-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 200px;
+            margin: 24px auto 0;
+        }
+
+        .movement-controls .md-button {
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 20px;
+            min-width: 60px;
+            min-height: 60px;
+        }
+
+        .movement-controls .md-button:nth-child(2) {
+            grid-column: 2;
+        }
+
+        .movement-controls .md-button:nth-child(3) {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .movement-controls .md-button:nth-child(4) {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        .movement-controls .md-button:nth-child(5) {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        /* 游戏结束对话框 */
+        .game-over-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .dialog-card {
+            background-color: var(--md-surface);
+            border-radius: 28px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: var(--md-shadow-4);
+            transform: scale(0.9);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .game-over-dialog.show .dialog-card {
+            transform: scale(1);
+        }
+
+        .dialog-title {
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 16px;
+            color: var(--md-on-surface);
+        }
+
+        .dialog-content {
+            color: var(--md-on-surface-variant);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .dialog-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        /* 关卡选择器 */
+        .level-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 16px;
+        }
+
+        .level-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            padding: 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .level-button.completed {
+            background-color: var(--md-secondary-container);
+            color: var(--md-secondary);
+        }
+
+        .level-button.current {
+            background-color: var(--md-primary);
+            color: white;
+            box-shadow: var(--md-shadow-2);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .app-bar {
+                padding: 12px 16px;
+            }
+
+            .game-header {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .game-container {
+                padding: 16px;
+                border-radius: 24px;
+            }
+
+            .control-panel {
+                flex-direction: column;
+            }
+
+            .md-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .bounce {
+            animation: bounce 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部应用栏 -->
+    <header class="app-bar">
+        <h1>推箱子</h1>
+        <div class="app-bar-actions">
+            <button class="md-button md-button-outlined" onclick="toggleTheme()">
+                <span>🎨</span> 主题
+            </button>
+            <button class="md-button md-button-outlined" onclick="showHelp()">
+                <span>❓</span> 帮助
+            </button>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <div class="game-container slide-in">
+            <!-- 游戏信息面板 -->
+            <div class="game-header">
+                <div class="level-info">
+                    <div class="info-item">
+                        <span class="info-label">关卡</span>
+                        <span class="info-value" id="level">1</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">步数</span>
+                        <span class="info-value" id="moves">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">推动</span>
+                        <span class="info-value" id="pushes">0</span>
+                    </div>
+                </div>
+                <div class="level-selector" id="levelSelector">
+                    <!-- 动态生成关卡按钮 -->
+                </div>
+            </div>
+
+            <!-- 游戏画布 -->
+            <canvas id="gameCanvas" class="game-board" width="640" height="480"></canvas>
+
+            <!-- 控制按钮组 -->
+            <div class="control-panel">
+                <button class="md-button md-button-outlined" onclick="undoMove()">
+                    <span>↶</span> 撤销
+                </button>
+                <button class="md-button md-button-outlined" onclick="resetLevel()">
+                    <span>🔄</span> 重置
+                </button>
+                <button class="md-button md-button-filled" onclick="nextLevel()">
+                    下一关 <span>→</span>
+                </button>
+            </div>
+
+            <!-- 移动控制按钮 -->
+            <div class="movement-controls">
+                <button class="md-button md-button-outlined" onclick="movePlayer(0, -1)">↑</button>
+                <button class="md-button md-button-outlined" onclick="movePlayer(-1, 0)">←</button>
+                <button class="md-button md-button-filled" onclick="movePlayer(0, 0)">●</button>
+                <button class="md-button md-button-outlined" onclick="movePlayer(1, 0)">→</button>
+                <button class="md-button md-button-outlined" onclick="movePlayer(0, 1)">↓</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 游戏完成对话框 -->
+    <div class="game-over-dialog" id="gameCompleteDialog">
+        <div class="dialog-card">
+            <h2 class="dialog-title">🎉 恭喜过关！</h2>
+            <div class="dialog-content">
+                <p>你用了 <strong id="finalMoves">0</strong> 步完成了这一关！</p>
+                <p>推动次数: <strong id="finalPushes">0</strong></p>
+                <p>最小步数: <strong id="minMoves">0</strong></p>
+            </div>
+            <div class="dialog-actions">
+                <button class="md-button md-button-outlined" onclick="closeDialog()">关闭</button>
+                <button class="md-button md-button-filled" onclick="nextLevel()">下一关</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 帮助对话框 -->
+    <div class="game-over-dialog" id="helpDialog">
+        <div class="dialog-card">
+            <h2 class="dialog-title">游戏说明</h2>
+            <div class="dialog-content">
+                <p><strong>目标：</strong>将所有箱子推到目标位置</p>
+                <p><strong>控制：</strong></p>
+                <ul style="margin-left: 20px; color: var(--md-on-surface-variant);">
+                    <li>方向键或 WASD 移动</li>
+                    <li>靠近箱子即可推动</li>
+                    <li>只能推，不能拉</li>
+                    <li>可以撤销移动</li>
+                </ul>
+            </div>
+            <div class="dialog-actions">
+                <button class="md-button md-button-filled" onclick="closeHelp()">知道了</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const TILE_SIZE = 32;
+
+        // Material Design 3 色彩主题
+        const themes = {
+            light: {
+                primary: '#6750A4',
+                secondary: '#625B71',
+                tertiary: '#7D5260',
+                surface: '#FEFBFF',
+                surfaceVariant: '#E7E0EC',
+                background: '#FEFBFF',
+                onSurface: '#1D1B20',
+                onSurfaceVariant: '#49454F',
+                outline: '#79747E'
+            },
+            dark: {
+                primary: '#D0BCFF',
+                secondary: '#CCC2DC',
+                tertiary: '#EFB8C8',
+                surface: '#141218',
+                surfaceVariant: '#49454F',
+                background: '#141218',
+                onSurface: '#E6E0E9',
+                onSurfaceVariant: '#CAC4D0',
+                outline: '#938F99'
+            }
+        };
+
+        let currentTheme = 'light';
+        let currentLevel = 0;
+        let gameMap = [];
+        let playerPos = {x: 0, y: 0};
+        let moves = 0;
+        let pushes = 0;
+        let moveHistory = [];
+        let completedLevels = JSON.parse(localStorage.getItem('completedLevels') || '[]');
+
+        // 游戏元素
+        const WALL = '#';
+        const FLOOR = ' ';
+        const PLAYER = '@';
+        const BOX = '$';
+        const GOAL = '.';
+        const PLAYER_ON_GOAL = '+';
+        const BOX_ON_GOAL = '*';
+
+        // 关卡数据
+        const levels = [
+            // 第1关 - 基础教学
+            {
+                name: "基础教学",
+                minMoves: 7,
+                map: [
+                    "######",
+                    "#    #",
+                    "# @$.#",
+                    "#    #",
+                    "######"
+                ]
+            },
+            // 第2关 - 简单布局
+            {
+                name: "简单布局",
+                minMoves: 12,
+                map: [
+                    "#######",
+                    "#     #",
+                    "#  @  #",
+                    "# $$  #",
+                    "#  .. #",
+                    "#######"
+            ]
+            },
+            // 第3关 - 角落箱子
+            {
+                name: "角落箱子",
+                minMoves: 18,
+                map: [
+                    "########",
+                    "#   @  #",
+                    "#  $   #",
+                    "#   $  #",
+                    "#..  ..#",
+                    "########"
+                ]
+            },
+            // 第4关 - 双重挑战
+            {
+                name: "双重挑战",
+                minMoves: 25,
+                map: [
+                    "#########",
+                    "#   @   #",
+                    "#  $ $  #",
+                    "#       #",
+                    "# .   . #",
+                    "# .   . #",
+                    "#########"
+                ]
+            },
+            // 第5关 - 迷宫布局
+            {
+                name: "迷宫布局",
+                minMoves: 35,
+                map: [
+                    "###########",
+                    "#    #    #",
+                    "# $$ # .. #",
+                    "#    #    #",
+                    "# ## # ## #",
+                    "# @  #  ###",
+                    "###########"
+                ]
+            },
+            // 第6关 - 复杂挑战
+            {
+                name: "复杂挑战",
+                minMoves: 45,
+                map: [
+                    "############",
+                    "#   @      #",
+                    "#  $$$     #",
+                    "#          #",
+                    "#  .##.    #",
+                    "#  .##.    #",
+                    "#  ....    #",
+                    "############"
+                ]
+            }
+        ];
+
+        // 初始化
+        function init() {
+            loadLevel(currentLevel);
+            drawGame();
+            setupKeyboardControls();
+            renderLevelSelector();
+            setupTheme();
+        }
+
+        // 设置主题
+        function setupTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            currentTheme = savedTheme;
+            applyTheme();
+        }
+
+        // 应用主题
+        function applyTheme() {
+            document.body.style.setProperty('--md-primary', themes[currentTheme].primary);
+            document.body.style.setProperty('--md-secondary', themes[currentTheme].secondary);
+            document.body.style.setProperty('--md-tertiary', themes[currentTheme].tertiary);
+            document.body.style.setProperty('--md-surface', themes[currentTheme].surface);
+            document.body.style.setProperty('--md-surface-variant', themes[currentTheme].surfaceVariant);
+            document.body.style.setProperty('--md-background', themes[currentTheme].background);
+            document.body.style.setProperty('--md-on-surface', themes[currentTheme].onSurface);
+            document.body.style.setProperty('--md-on-surface-variant', themes[currentTheme].onSurfaceVariant);
+            document.body.style.setProperty('--md-outline', themes[currentTheme].outline);
+            
+            drawGame();
+        }
+
+        // 切换主题
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('theme', currentTheme);
+            applyTheme();
+        }
+
+        // 渲染关卡选择器
+        function renderLevelSelector() {
+            const selector = document.getElementById('levelSelector');
+            selector.innerHTML = '';
+            
+            levels.forEach((level, index) => {
+                const button = document.createElement('button');
+                button.className = 'md-button level-button';
+                button.textContent = index + 1;
+                
+                if (completedLevels.includes(index)) {
+                    button.classList.add('completed');
+                }
+                
+                if (index === currentLevel) {
+                    button.classList.add('current');
+                }
+                
+                button.onclick = () => loadLevel(index);
+                selector.appendChild(button);
+            });
+        }
+
+        // 加载关卡
+        function loadLevel(levelIndex) {
+            if (levelIndex < 0 || levelIndex >= levels.length) return;
+            
+            currentLevel = levelIndex;
+            const level = levels[levelIndex];
+            gameMap = [];
+            moveHistory = [];
+            
+            for (let y = 0; y < level.map.length; y++) {
+                gameMap[y] = [];
+                for (let x = 0; x < level.map[y].length; x++) {
+                    const char = level.map[y][x];
+                    gameMap[y][x] = char;
+                    
+                    if (char === PLAYER || char === PLAYER_ON_GOAL) {
+                        playerPos = {x: x, y: y};
+                        if (char === PLAYER) {
+                            gameMap[y][x] = FLOOR;
+                        } else {
+                            gameMap[y][x] = GOAL;
+                        }
+                    }
+                }
+            }
+            
+            moves = 0;
+            pushes = 0;
+            updateStats();
+            drawGame();
+            renderLevelSelector();
+        }
+
+        // 绘制游戏
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const theme = themes[currentTheme];
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const mapWidth = gameMap[0].length * TILE_SIZE;
+            const mapHeight = gameMap.length * TILE_SIZE;
+            const startX = centerX - mapWidth / 2;
+            const startY = centerY - mapHeight / 2;
+            
+            // 绘制阴影背景
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(startX + 4, startY + 4, mapWidth, mapHeight);
+            
+            // 绘制游戏元素
+            for (let y = 0; y < gameMap.length; y++) {
+                for (let x = 0; x < gameMap[y].length; x++) {
+                    const tile = gameMap[y][x];
+                    const drawX = startX + x * TILE_SIZE;
+                    const drawY = startY + y * TILE_SIZE;
+                    
+                    // 绘制地板
+                    drawFloor(drawX, drawY);
+                    
+                    // 绘制墙壁
+                    if (tile === WALL) {
+                        drawWall(drawX, drawY);
+                    }
+                    // 绘制目标点
+                    else if (tile === GOAL) {
+                        drawGoal(drawX, drawY);
+                    }
+                    // 绘制箱子
+                    else if (tile === BOX) {
+                        drawBox(drawX, drawY, false);
+                    }
+                    // 绘制箱子在目标点上
+                    else if (tile === BOX_ON_GOAL) {
+                        drawBox(drawX, drawY, true);
+                    }
+                }
+            }
+            
+            // 绘制玩家
+            drawPlayer(startX + playerPos.x * TILE_SIZE, startY + playerPos.y * TILE_SIZE);
+        }
+
+        // 绘制地板
+        function drawFloor(x, y) {
+            const theme = themes[currentTheme];
+            
+            // 基础地板
+            ctx.fillStyle = theme.surface;
+            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+            
+            // 网格线
+            ctx.strokeStyle = currentTheme === 'light' ? '#F5F5F5' : '#2A2A2A';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+            
+            // 添加纹理
+            ctx.fillStyle = currentTheme === 'light' ? 'rgba(0, 0, 0, 0.02)' : 'rgba(255, 255, 255, 0.02)';
+            ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+        }
+
+        // 绘制墙壁
+        function drawWall(x, y) {
+            const theme = themes[currentTheme];
+            
+            // 墙壁主体
+            const gradient = ctx.createLinearGradient(x, y, x + TILE_SIZE, y + TILE_SIZE);
+            gradient.addColorStop(0, theme.secondary);
+            gradient.addColorStop(1, adjustColor(theme.secondary, 0.8));
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+            
+            // 高光
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, 4);
+            ctx.fillRect(x + 2, y + 2, 4, TILE_SIZE - 4);
+            
+            // 阴影
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fillRect(x + TILE_SIZE - 6, y + 6, 4, TILE_SIZE - 8);
+            ctx.fillRect(x + 6, y + TILE_SIZE - 6, TILE_SIZE - 12, 4);
+        }
+
+        // 绘制目标点
+        function drawGoal(x, y) {
+            const theme = themes[currentTheme];
+            const centerX = x + TILE_SIZE / 2;
+            const centerY = y + TILE_SIZE / 2;
+            
+            // 外圈
+            ctx.strokeStyle = theme.tertiary;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, TILE_SIZE / 4, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // 内圈
+            ctx.fillStyle = theme.tertiary;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, TILE_SIZE / 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 光晕
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, TILE_SIZE / 3);
+            gradient.addColorStop(0, adjustColor(theme.tertiary, 0.3));
+            gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, TILE_SIZE / 3, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        // 绘制箱子
+        function drawBox(x, y, onGoal) {
+            const theme = themes[currentTheme];
+            const color = onGoal ? theme.tertiary : theme.primary;
+            
+            // 箱子主体
+            const gradient = ctx.createLinearGradient(x, y, x + TILE_SIZE, y + TILE_SIZE);
+            gradient.addColorStop(0, color);
+            gradient.addColorStop(1, adjustColor(color, 0.8));
+            
+            ctx.fillStyle = gradient;
+            drawRoundRect(x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8, 6);
+            ctx.fill();
+            
+            // 边框
+            ctx.strokeStyle = adjustColor(color, 0.6);
+            ctx.lineWidth = 2;
+            drawRoundRect(x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8, 6);
+            ctx.stroke();
+            
+            // 高光
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            drawRoundRect(x + 6, y + 6, TILE_SIZE - 16, TILE_SIZE - 16, 4);
+            ctx.fill();
+            
+            // 如果是目标上的箱子，添加特殊效果
+            if (onGoal) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.beginPath();
+                ctx.arc(x + TILE_SIZE / 2, y + TILE_SIZE / 2, TILE_SIZE / 6, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+
+        // 绘制玩家
+        function drawPlayer(x, y) {
+            const theme = themes[currentTheme];
+            const centerX = x + TILE_SIZE / 2;
+            const centerY = y + TILE_SIZE / 2;
+            
+            // 玩家身体
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, TILE_SIZE / 3);
+            gradient.addColorStop(0, theme.primary);
+            gradient.addColorStop(1, adjustColor(theme.primary, 0.8));
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, TILE_SIZE / 3, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 边框
+            ctx.strokeStyle = adjustColor(theme.primary, 0.6);
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, TILE_SIZE / 3, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // 眼睛
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(centerX - 6, centerY - 4, 3, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX + 6, centerY - 4, 3, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 瞳孔
+            ctx.fillStyle = theme.onSurface;
+            ctx.beginPath();
+            ctx.arc(centerX - 6, centerY - 4, 1.5, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX + 6, centerY - 4, 1.5, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 微笑
+            ctx.strokeStyle = theme.onSurface;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY + 2, 8, 0.2 * Math.PI, 0.8 * Math.PI);
+            ctx.stroke();
+        }
+
+        // 绘制圆角矩形
+        function drawRoundRect(x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        // 调整颜色透明度
+        function adjustColor(color, alpha) {
+            const hex = color.replace('#', '');
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        // 移动玩家
+        function movePlayer(dx, dy) {
+            if (dx === 0 && dy === 0) return;
+            
+            const newX = playerPos.x + dx;
+            const newY = playerPos.y + dy;
+            
+            // 检查边界
+            if (newX < 0 || newX >= gameMap[0].length || newY < 0 || newY >= gameMap.length) {
+                return;
+            }
+            
+            const targetTile = gameMap[newY][newX];
+            
+            // 撞墙
+            if (targetTile === WALL) {
+                return;
+            }
+            
+            let push = false;
+            
+            // 推箱子
+            if (targetTile === BOX || targetTile === BOX_ON_GOAL) {
+                const boxNewX = newX + dx;
+                const boxNewY = newY + dy;
+                
+                // 检查箱子是否可以移动
+                if (boxNewX < 0 || boxNewX >= gameMap[0].length || boxNewY < 0 || boxNewY >= gameMap.length) {
+                    return;
+                }
+                
+                const boxTargetTile = gameMap[boxNewY][boxNewX];
+                if (boxTargetTile === WALL || boxTargetTile === BOX || boxTargetTile === BOX_ON_GOAL) {
+                    return;
+                }
+                
+                // 保存移动历史
+                moveHistory.push({
+                    playerPos: {x: playerPos.x, y: playerPos.y},
+                    boxPos: {x: newX, y: newY},
+                    boxOldTile: targetTile,
+                    boxNewTile: boxTargetTile
+                });
+                
+                // 移动箱子
+                if (targetTile === BOX) {
+                    gameMap[newY][newX] = FLOOR;
+                } else {
+                    gameMap[newY][newX] = GOAL;
+                }
+                
+                if (boxTargetTile === GOAL) {
+                    gameMap[boxNewY][boxNewX] = BOX_ON_GOAL;
+                } else {
+                    gameMap[boxNewY][boxNewX] = BOX;
+                }
+                
+                push = true;
+                pushes++;
+            } else {
+                // 保存移动历史（普通移动）
+                moveHistory.push({
+                    playerPos: {x: playerPos.x, y: playerPos.y},
+                    boxPos: null
+                });
+            }
+            
+            // 移动玩家
+            playerPos.x = newX;
+            playerPos.y = newY;
+            moves++;
+            
+            updateStats();
+            drawGame();
+            
+            // 添加动画效果
+            canvas.classList.add('bounce');
+            setTimeout(() => canvas.classList.remove('bounce'), 300);
+            
+            // 检查是否完成
+            if (checkWin()) {
+                setTimeout(() => {
+                    levelComplete();
+                }, 500);
+            }
+        }
+
+        // 撤销移动
+        function undoMove() {
+            if (moveHistory.length === 0) return;
+            
+            const lastMove = moveHistory.pop();
+            
+            // 恢复玩家位置
+            playerPos.x = lastMove.playerPos.x;
+            playerPos.y = lastMove.playerPos.y;
+            
+            // 恢复箱子位置
+            if (lastMove.boxPos) {
+                const {x, y} = lastMove.boxPos;
+                gameMap[y][x] = lastMove.boxOldTile;
+                
+                const newX = x + (x - lastMove.playerPos.x);
+                const newY = y + (y - lastMove.playerPos.y);
+                gameMap[newY][newX] = lastMove.boxNewTile;
+                
+                pushes--;
+            }
+            
+            moves--;
+            updateStats();
+            drawGame();
+        }
+
+        // 检查是否获胜
+        function checkWin() {
+            for (let y = 0; y < gameMap.length; y++) {
+                for (let x = 0; x < gameMap[y].length; x++) {
+                    if (gameMap[y][x] === BOX) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // 关卡完成
+        function levelComplete() {
+            if (!completedLevels.includes(currentLevel)) {
+                completedLevels.push(currentLevel);
+                localStorage.setItem('completedLevels', JSON.stringify(completedLevels));
+            }
+            
+            document.getElementById('finalMoves').textContent = moves;
+            document.getElementById('finalPushes').textContent = pushes;
+            document.getElementById('minMoves').textContent = levels[currentLevel].minMoves;
+            
+            const dialog = document.getElementById('gameCompleteDialog');
+            dialog.classList.add('show');
+            dialog.style.display = 'flex';
+            
+            renderLevelSelector();
+        }
+
+        // 下一关
+        function nextLevel() {
+            closeDialog();
+            if (currentLevel < levels.length - 1) {
+                loadLevel(currentLevel + 1);
+            } else {
+                alert('🎉 恭喜你完成了所有关卡！');
+            }
+        }
+
+        // 重置关卡
+        function resetLevel() {
+            loadLevel(currentLevel);
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            document.getElementById('level').textContent = currentLevel + 1;
+            document.getElementById('moves').textContent = moves;
+            document.getElementById('pushes').textContent = pushes;
+        }
+
+        // 关闭对话框
+        function closeDialog() {
+            const dialogs = document.querySelectorAll('.game-over-dialog');
+            dialogs.forEach(dialog => {
+                dialog.classList.remove('show');
+                dialog.style.display = 'none';
+            });
+        }
+
+        // 显示帮助
+        function showHelp() {
+            const dialog = document.getElementById('helpDialog');
+            dialog.classList.add('show');
+            dialog.style.display = 'flex';
+        }
+
+        // 关闭帮助
+        function closeHelp() {
+            closeDialog();
+        }
+
+        // 设置键盘控制
+        function setupKeyboardControls() {
+            document.addEventListener('keydown', (e) => {
+                switch (e.key) {
+                    case 'ArrowUp':
+                    case 'w':
+                    case 'W':
+                        e.preventDefault();
+                        movePlayer(0, -1);
+                        break;
+                    case 'ArrowDown':
+                    case 's':
+                    case 'S':
+                        e.preventDefault();
+                        movePlayer(0, 1);
+                        break;
+                    case 'ArrowLeft':
+                    case 'a':
+                    case 'A':
+                        e.preventDefault();
+                        movePlayer(-1, 0);
+                        break;
+                    case 'ArrowRight':
+                    case 'd':
+                    case 'D':
+                        e.preventDefault();
+                        movePlayer(1, 0);
+                        break;
+                    case 'z':
+                    case 'Z':
+                        e.preventDefault();
+                        undoMove();
+                        break;
+                    case 'r':
+                    case 'R':
+                        e.preventDefault();
+                        resetLevel();
+                        break;
+                }
+            });
+        }
+
+        // 初始化游戏
+        init();
+    </script>
+</body>
+</html>
