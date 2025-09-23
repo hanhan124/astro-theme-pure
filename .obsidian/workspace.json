@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "4a8505212a51fe2d",
+        "id": "579dc7912fb7cac0",
         "type": "tabs",
         "children": [
           {
-            "id": "377631a72d9890e6",
+            "id": "10177f68a918891c",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "src/content/blog/2025/20250924/index.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "新标签页"
+              "title": "index"
             }
           }
         ]
@@ -162,8 +166,28 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "377631a72d9890e6",
+  "active": "69aaf2cc3f7dbda9",
   "lastOpenFiles": [
+    "src/content/blog/2025/20250912/thumbnail.jpg",
+    "src/content/blog/2025/20250912/index.md",
+    "src/content/blog/2025/20250912",
+    "src/content/blog/2025/20250913/thumbnail.jpg",
+    "src/content/blog/2025/20250913/index.md",
+    "src/content/blog/2025/20250913",
+    "src/content/blog/2025/20250914/thumbnail.jpg",
+    "src/content/blog/2025/20250914/index.md",
+    "src/content/blog/2025/20250914",
+    "src/content/blog/2025/20250915/thumbnail.jpg",
+    "src/content/blog/2025/20250915/index.md",
+    "src/content/blog/2025/20250915",
+    "src/content/blog/2025/20250924/thumbnail.jpg",
+    "src/content/blog/2025/20250924/index.md",
+    "2025-09-15.md",
+    "src/content/blog/2025/20250915_autumn/index.md",
+    "src/content/blog/2025/20250924/799.jpg",
+    "src/content/blog/2025/20250924",
+    "src/content/blog/2025/20250915_autumn/未命名",
+    "src/content/blog/2025/20250912_Spring Festival/index.md",
     "src/content/blog/故都的秋/thumbnail.jpg",
     "src/content/blog/故都的秋.md",
     "src/content/blog/故都的秋/故都的秋.md",
