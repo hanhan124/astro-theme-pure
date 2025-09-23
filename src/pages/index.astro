@@ -121,10 +121,11 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
 
     <div id='content' class='animate flex flex-col gap-y-10 md:w-4/5 lg:w-5/6'>
       <Section title='About'>
-        <p class='text-muted-foreground'>Hi, I’m Han</p>
+        <p class='text-muted-foreground'>👋Hi, I’m Han, PhD student in Biomedical</p>
         <p class='text-muted-foreground'>
-          A PhD student in biomedicine. My days are stitched together from experiments, data, failures, and the rare, glittering success. This blog is the quiet corner where I jot down what happens in lab—and what happens when I step away from the microscope.
-
+        Here are the articles that I have written or excerpted 📝<br />
+        Covering various topics such as technology, life, efficiency, photography, etc.<br />
+        Welcome to browse and leave a comment if you have any questions or suggestions.  :)
         </p>
       </Section>
       {
@@ -176,10 +177,10 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
       <Section title='Website List'>
         <div class='grid grid-cols-1 gap-3 sm:grid-cols-2'>
           <ProjectCard
-            href='https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-            heading='Lorem ipsum'
-            subheading='dolor sit amet, oratio ornatus explicari pro ex'
-            imagePath='/src/assets/projects/alex-tyson-2BAXJ7ha74s-unsplash.jpg'
+            href='https://earth.google.com/'
+            heading='Google Earth'
+            subheading='Explore the world'
+            imagePath='/src/assets/projects/earth.jpg'
           />
           <ProjectCard
             href='https://www.youtube.com/watch?v=dQw4w9WgXcQ'
@@ -207,6 +208,6 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
         <SkillLayout title='Tools' skills={Tools} />
       </Section>
     </div>
-    <Quote class='mt-12' />
+    <Quote class='mt-12' defaultText='哈哈哈' />
   </main>
 </PageLayout>

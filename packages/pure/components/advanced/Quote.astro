@@ -12,7 +12,7 @@ const { class: className } = Astro.props
       ></span>
       <span class='size-2 rounded-full bg-green-400'></span>
     </span>
-    <p id='quote-sentence' class='font-medium text-muted-foreground'>不以物喜，不以己悲</p>
+    <p id='quote-sentence' class='font-medium text-muted-foreground'>哈哈哈</p>
   </div>
 </quote-component>
 
@@ -29,15 +29,38 @@ const { class: className } = Astro.props
     render(sentence: string) {
       const quoteEl = this.querySelector('#quote-sentence') as HTMLElement
       if (!quoteEl) return
-      quoteEl.innerText = sentence
+      quoteEl.innerText = sentence || '哈哈哈'
     }
 
     connectedCallback() {
-      // Because virtual:config can only be accessed using json string, function cannot work, so we need to use new Function
-      const targetFunction = new Function('return ' + quote.target)()
-      fetch(quote.server)
-        .then((response) => response.json())
-        .then((data) => this.render(targetFunction(data)))
+      try {
+        // 检查是否配置了服务器地址
+        if (!quote.server) {
+          // 没有配置服务器地址，直接显示默认文本
+          this.render('哈哈哈')
+          return
+        }
+        
+        // 因为virtual:config只能使用JSON字符串访问，函数不能直接工作，所以我们需要使用new Function
+        const targetFunction = new Function('return ' + quote.target)()
+        fetch(quote.server)
+          .then((response) => {
+            if (!response.ok) throw new Error('Network response was not ok')
+            return response.json()
+          })
+          .then((data) => {
+            this.render(targetFunction(data))
+          })
+          .catch((error) => {
+            console.error('Error fetching quote:', error)
+            // 请求失败时也显示默认文本
+            this.render('哈哈哈')
+          })
+      } catch (error) {
+        console.error('Quote component error:', error)
+        // 发生任何错误时都显示默认文本
+        this.render('哈哈哈')
+      }
     }
   }
   customElements.define('quote-component', Quote)
