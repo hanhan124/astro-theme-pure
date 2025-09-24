@@ -201,13 +201,25 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
             imagePath='/src/assets/projects/wen-qiao-g_w8I64FiO0-unsplash.jpg'
           />
         </div>
+        
+     {/*      
       </Section>
 
       <Section title='Skills'>
         <SkillLayout title='Languages' skills={languages} />
         <SkillLayout title='Tools' skills={Tools} />
-      </Section>
+      </Section>    */}
+
     </div>
-    <Quote class='mt-12' defaultText='哈哈哈' />
+    <Quote class='mt-12' />
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const quoteComponent = document.querySelector('quote-component');
+        if (quoteComponent) {
+          quoteComponent.render('To be continued... :)');
+        }
+      });
+    </script>
+
   </main>
 </PageLayout>
