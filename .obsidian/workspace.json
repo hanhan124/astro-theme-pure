@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "src/content/blog/2025/20250924/index.md",
+                "file": "src/content/blog/2025/20250925/index.md",
                 "mode": "source",
                 "source": false
               },
@@ -163,11 +163,21 @@
       "daily-notes:打开/创建今天的日记": false,
       "templates:插入模板": false,
       "command-palette:打开命令面板": false,
-      "bases:创建新数据库": false
+      "bases:创建新数据库": false,
+      "publish:发布更改": false
     }
   },
-  "active": "69aaf2cc3f7dbda9",
+  "active": "10177f68a918891c",
   "lastOpenFiles": [
+    "src/content/blog/2025/20250925/thumbnail.jpg",
+    "src/thumbnail.jpg",
+    "src/content/blog/2025/20250924/index.md",
+    "src/content/blog/2025/20250925/index.md",
+    "src/content/blog/2025/20250925/INDEX.md",
+    "src/content/blog/2025/20250925 1",
+    "src/content/blog/2025/20250925",
+    "src/content/blog/2025/20250924/未命名.md",
+    "src/content/blog/examples/index template.md",
     "src/content/blog/2025/20250912/thumbnail.jpg",
     "src/content/blog/2025/20250912/index.md",
     "src/content/blog/2025/20250912",
@@ -181,7 +191,6 @@
     "src/content/blog/2025/20250915/index.md",
     "src/content/blog/2025/20250915",
     "src/content/blog/2025/20250924/thumbnail.jpg",
-    "src/content/blog/2025/20250924/index.md",
     "2025-09-15.md",
     "src/content/blog/2025/20250915_autumn/index.md",
     "src/content/blog/2025/20250924/799.jpg",
@@ -195,10 +204,7 @@
     "src/content/blog/故都的秋",
     "src/content/blog/新建文件夹",
     "src/content/blog/autumn.jpg",
-    "src/content/blog/autumn.jpg.crdownload",
-    "src/content/blog/music-journey/thumbnail.jpg",
     "src/content/blog/customize/index.md",
-    "src/content/blog/3d-rendering/index.md",
-    "src/content/blog/未命名"
+    "src/content/blog/3d-rendering/index.md"
   ]
 }
