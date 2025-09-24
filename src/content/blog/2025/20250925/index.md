@@ -14,6 +14,8 @@ language: English
 
 Markdown is a lightweight and easy-to-use syntax for styling your writing.
 
+![image.png](https://raw.githubusercontent.com/hanhan124/blog_bed/main/img/20250924212006637.png)
+
 ### Headers
 
 When the content of the article is extensive, you can use headers to segment:
