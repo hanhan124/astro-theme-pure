@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>384孔板编辑与导出</title>
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans SC', sans-serif; background:#f5f7fa; margin:0; }
+    .container { display:flex; gap:0; height: 100vh; }
+    .left { flex:1; display:flex; flex-direction:column; }
+    .stage-wrap { flex:1; position:relative; overflow:hidden; background:#fff; border-right:1px solid #e5e7eb; }
+    .stage { position:absolute; left:0; top:0; transform-origin:0 0; }
+    .grid-container { padding:16px; }
+    #grid { border-collapse: collapse; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+    #grid th, #grid td { border:1px solid #e5e7eb; width:35px; height:35px; text-align:center; vertical-align:middle; font-size:12px; line-height:1.4; }
+    #grid th { background:#f3f4f6; font-weight:600; cursor:pointer; user-select:none; color:#374151; position:sticky; z-index:1; }
+    #grid td { cursor:pointer; background:#ffffff; }
+    #grid td.selected { outline:2px solid #60a5fa; outline-offset:-2px; }
+    #grid td.only-sample { background-color:#fef3c7; }
+    #grid td.only-gene { background-color:#ede9fe; }
+    #grid td.both-values { background-color:#d1fae5; }
+    .value-text { display:inline-block; padding:2px 2px; border:1px solid #d1d5db; border-radius:4px; margin:1px 0; }
+    .target-gene { font-style: italic; }
+    .toolbar { padding:12px 16px; border-top:1px solid #e5e7eb; background:#fafafa; display:flex; align-items:center; gap:12px; }
+    .right { width:320px; background:#f9fafb; border-left:1px solid #e5e7eb; display:flex; flex-direction:column; }
+    .sidebar { padding:16px; overflow:auto; }
+    .sidebar h2 { margin:0 0 12px; font-size:16px; font-weight:700; color:#111827; }
+    .form-row { margin-bottom:12px; }
+    .form-row label { display:block; font-size:12px; color:#374151; margin-bottom:6px; }
+    .form-row input, .form-row select { width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:13px; background:#fff; }
+    .btn { width:100%; padding:10px; font-size:13px; font-weight:600; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-bottom:8px; }
+    .btn-primary { background:#2563eb; }
+    .btn-gray { background:#6b7280; }
+    .btn-orange { background:#f97316; }
+    .btn-red { background:#ef4444; }
+    .btn-green { background:#16a34a; }
+    .btn:hover { filter:brightness(0.95); }
+    .small { font-size:12px; color:#6b7280; }
+  </style>
+  <!-- SheetJS for xlsx export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- html2canvas for screenshot export -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="left">
+      <div class="stage-wrap" id="stageWrap" aria-label="Plate viewport">
+        <div class="stage" id="stage" style="transform: translate(0px, 0px) scale(1);">
+          <div class="grid-container">
+            <table id="grid"></table>
+          </div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <span class="small">缩放(滚轮)、平移(按住空格或中键拖拽)</span>
+        <label class="small">比例</label>
+        <input id="zoomRange" type="range" min="0.5" max="2" step="0.01" value="1" style="width:160px;">
+        <button id="resetView" class="btn btn-gray" style="width:auto; padding:6px 10px;">重置视图</button>
+        <span class="small" id="viewStatus">scale:1.00, x:0, y:0</span>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="sidebar">
+        <h2>384-well Plateeditor</h2>
+
+        <div class="form-row">
+          <label for="instrument">仪器类型</label>
+          <select id="instrument">
+            <option value="roche">Roche (Cp)</option>
+            <option value="biorad">Bio-Rad (Cq)</option>
+          </select>
+        </div>
+
+        <h2 style="margin-top:16px;">Excel导入（.xlsx/.xls）</h2>
+        <div class="form-row">
+          <label for="excelFile">选择Excel文件</label>
+          <input type="file" id="excelFile" accept=".xlsx,.xls">
+        </div>
+        <div class="form-row" style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="clearBeforeImport" checked>
+          <label for="clearBeforeImport" style="margin:0;">导入前清空板</label>
+        </div>
+        <button class="btn btn-primary" id="importExcelBtn">导入Excel</button>
+
+        <p class="small">说明：自动识别 Bio-Rad（Well/Target/Sample/Cq）或 Roche（Pos/Name/Cp）。Roche导入时用 Pos 预填充“基因名”（如 A1、B12），导入后可在右侧修改为真实基因。</p>
+
+        <div class="form-row">
+          <label for="sampleName">样本名 (group)</label>
+          <input type="text" id="sampleName" placeholder="输入样本名">
+        </div>
+
+        <div class="form-row">
+          <label for="targetGene">基因名</label>
+          <input type="text" id="targetGene" placeholder="输入基因名">
+        </div>
+
+        <p class="small">CT值由Excel导入自动读取并显示（Roche=Cp，Bio-Rad=Cq），不可在此处编辑。</p>
+
+        <button class="btn btn-primary" id="applyBtn">应用到选中</button>
+        <button class="btn btn-gray" id="removeSelBtn">清除选中状态</button>
+        <button class="btn btn-orange" id="clearSampleBtn">清空选中样本名</button>
+        <button class="btn btn-orange" id="clearGeneBtn">清空选中基因名</button>
+        <button class="btn btn-orange" id="clearValuesBtn">清空选中值</button>
+        <button class="btn btn-red" id="resetAllBtn">重置所有单元格</button>
+
+
+
+
+
+
+        <p class="small">导出xlsx的“num”为组内行序号（从1开始）；基因列按板中“出现顺序”去重生成；无值填NA。CT显示取决于仪器类型：Roche显示Cp，Bio-Rad显示Cq。</p>
+
+        <h2 style="margin-top:16px;">导出xlsx</h2>
+        <div class="form-row">
+          <label for="xlsxFileName">xlsx 文件名</label>
+          <input type="text" id="xlsxFileName" placeholder="可选，默认时间戳">
+        </div>
+        <button class="btn btn-green" id="exportXLSXBtn">导出xlsx</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const rows = 16;
+    const cols = 24;
+    const rowLabels = Array.from({length: rows}, (_, i) => String.fromCharCode(65 + i)); // A..P
+    const grid = document.getElementById('grid');
+
+    // Selection state
+    let isDragging = false;
+    let startElement = null;
+    let dragType = null; // 'cell','row','col'
+    // Colors
+    // 更清淡的浅色系调色板（pastel）
+    const colorPalette = [
+      '#ffe5e5','#fff0d6','#fff9cc','#eaffea','#e6f7ff',
+      '#e9f0ff','#eee9ff','#ffe9f7','#ffe9ef','#fff2e6',
+      '#fff6d9','#ecfff7','#e9f8ff','#f2e9ff','#ffe6f2',
+      '#ffece0','#f2ffe6','#eaffff','#f3eaff','#ffe8ec'
+    ];
+    // 颜色映射采用LRU，避免无限增长
+    const MAX_COLOR_MAP = 200;
+    const sampleNameColors = new Map();
+    const targetGeneColors = new Map();
+    function getValueColor(value, type) {
+      const map = type === 'sample' ? sampleNameColors : targetGeneColors;
+      if (!value) return '#fff';
+      if (!map.has(value)) {
+        // 超限则淘汰最早插入的键
+        if (map.size >= MAX_COLOR_MAP) {
+          const firstKey = map.keys().next().value;
+          map.delete(firstKey);
+        }
+        const colorIndex = map.size % colorPalette.length;
+        map.set(value, colorPalette[colorIndex]);
+      }
+      return map.get(value);
+    }
+
+    // Build grid
+    function createGrid() {
+      grid.innerHTML = '';
+      let header = '<tr><th></th>';
+      for (let c=1; c<=cols; c++) {
+        header += `<th data-col="${c}" onmousedown="startDrag(this,'col')" onmouseover="dragSelect(this)" onmouseup="endDrag()">${c}</th>`;
+      }
+      header += '</tr>';
+      grid.innerHTML += header;
+
+      for (let r=0; r<rows; r++) {
+        let rowHTML = `<tr><th data-row="${rowLabels[r]}" onmousedown="startDrag(this,'row')" onmouseover="dragSelect(this)" onmouseup="endDrag()">${rowLabels[r]}</th>`;
+        for (let c=1; c<=cols; c++) {
+          rowHTML += `<td data-row="${rowLabels[r]}" data-col="${c}" onmousedown="startDrag(this,'cell')" onmouseover="dragSelect(this)" onmouseup="endDrag()"></td>`;
+        }
+        rowHTML += '</tr>';
+        grid.innerHTML += rowHTML;
+      }
+    }
+
+    // Update cell display
+    function updateCellAppearance(cell) {
+      const sample = cell.dataset.sampleName || '';
+      const gene = cell.dataset.targetGene || '';
+      const ct = cell.dataset.ct || '';
+      cell.classList.remove('only-sample','only-gene','both-values');
+
+      let html = '';
+      if (sample && gene) {
+        cell.classList.add('both-values');
+        html = `<span class="value-text" style="background:${getValueColor(sample,'sample')}">${sample}</span><br><span class="value-text target-gene" style="background:${getValueColor(gene,'gene')}">${gene}</span>`;
+      } else if (sample) {
+        cell.classList.add('only-sample');
+        html = `<span class="value-text" style="background:${getValueColor(sample,'sample')}">${sample}</span>`;
+      } else if (gene) {
+        cell.classList.add('only-gene');
+        html = `<span class="value-text target-gene" style="background:${getValueColor(gene,'gene')}">${gene}</span>`;
+      }
+      cell.innerHTML = html;
+      const inst = document.getElementById('instrument').value;
+      const ctLabel = inst === 'roche' ? 'Cp' : 'Cq';
+      cell.title = `Pos ${cell.dataset.row}${cell.dataset.col} | Sample: ${sample || 'None'} | Gene: ${gene || 'None'} | ${ctLabel}: ${ct || 'NA'}`;
+    }
+
+    // Sidebar inputs sync
+    function updateSidebarInputs() {
+      const selected = document.querySelectorAll('#grid td.selected');
+      const sampleInput = document.getElementById('sampleName');
+      const geneInput = document.getElementById('targetGene');
+
+      if (selected.length > 0) {
+        const samples = Array.from(selected).map(td => td.dataset.sampleName || '');
+        const genes = Array.from(selected).map(td => td.dataset.targetGene || '');
+        const us = [...new Set(samples)];
+        const ug = [...new Set(genes)];
+        sampleInput.value = us.length === 1 ? us[0] : '';
+        geneInput.value = ug.length === 1 ? ug[0] : '';
+      } else {
+        sampleInput.value = '';
+        geneInput.value = '';
+      }
+    }
+
+    // Selection helpers
+    function clearSelections() {
+      document.querySelectorAll('#grid td.selected').forEach(td => td.classList.remove('selected'));
+    }
+    window.startDrag = function(el, type) {
+      isDragging = true;
+      startElement = el;
+      dragType = type;
+      clearSelections();
+      if (type === 'row') {
+        const label = el.dataset.row;
+        document.querySelectorAll(`td[data-row="${label}"]`).forEach(td => td.classList.add('selected'));
+      } else if (type === 'col') {
+        const col = parseInt(el.dataset.col);
+        document.querySelectorAll(`td[data-col="${col}"]`).forEach(td => td.classList.add('selected'));
+      } else if (type === 'cell') {
+        el.classList.add('selected');
+      }
+      updateSidebarInputs();
+    };
+    window.dragSelect = function(el) {
+      if (!isDragging) return;
+      clearSelections();
+      if (dragType === 'row' && el.dataset.row) {
+        const s = rowLabels.indexOf(startElement.dataset.row);
+        const e = rowLabels.indexOf(el.dataset.row);
+        const min = Math.min(s,e), max = Math.max(s,e);
+        for (let r=min; r<=max; r++) {
+          document.querySelectorAll(`td[data-row="${rowLabels[r]}"]`).forEach(td => td.classList.add('selected'));
+        }
+      } else if (dragType === 'col' && el.dataset.col) {
+        const s = parseInt(startElement.dataset.col);
+        const e = parseInt(el.dataset.col);
+        const min = Math.min(s,e), max = Math.max(s,e);
+        for (let c=min; c<=max; c++) {
+          document.querySelectorAll(`td[data-col="${c}"]`).forEach(td => td.classList.add('selected'));
+        }
+      } else if (dragType === 'cell' && el.dataset.row && el.dataset.col) {
+        const sr = rowLabels.indexOf(startElement.dataset.row);
+        const sc = parseInt(startElement.dataset.col);
+        const er = rowLabels.indexOf(el.dataset.row);
+        const ec = parseInt(el.dataset.col);
+        const rmin = Math.min(sr,er), rmax = Math.max(sr,er);
+        const cmin = Math.min(sc,ec), cmax = Math.max(sc,ec);
+        for (let r=rmin; r<=rmax; r++) {
+          for (let c=cmin; c<=cmax; c++) {
+            const td = document.querySelector(`td[data-row="${rowLabels[r]}"][data-col="${c}"]`);
+            if (td) td.classList.add('selected');
+          }
+        }
+      }
+      updateSidebarInputs();
+    };
+    window.endDrag = function() { isDragging = false; dragType = null; };
+
+    // Apply values
+    function applyValues() {
+      const sample = document.getElementById('sampleName').value.trim();
+      const gene = document.getElementById('targetGene').value.trim();
+      const selected = document.querySelectorAll('#grid td.selected');
+      selected.forEach(td => {
+        if (sample) td.dataset.sampleName = sample;
+        if (gene) td.dataset.targetGene = gene;
+        updateCellAppearance(td);
+        td.classList.remove('selected');
+      });
+      updateSidebarInputs();
+    }
+    function removeSelections() { clearSelections(); updateSidebarInputs(); }
+    function clearSelectedSampleNames() {
+      document.querySelectorAll('#grid td.selected').forEach(td => { td.dataset.sampleName = ''; updateCellAppearance(td); });
+      updateSidebarInputs();
+    }
+    function clearSelectedTargetGenes() {
+      document.querySelectorAll('#grid td.selected').forEach(td => { td.dataset.targetGene = ''; updateCellAppearance(td); });
+      updateSidebarInputs();
+    }
+    function clearSelectedValues() {
+      const tds = Array.from(document.querySelectorAll('#grid td.selected'));
+      if (tds.length === 0) { updateSidebarInputs(); return; }
+      tds.forEach(td => {
+        td.classList.remove('only-sample','only-gene','both-values');
+        td.dataset.sampleName = ''; td.dataset.targetGene=''; td.dataset.ct='';
+      });
+      // 批量更新外观，减少重绘
+      requestAnimationFrame(() => {
+        tds.forEach(td => { td.title=''; td.innerHTML=''; updateCellAppearance(td); });
+        updateSidebarInputs();
+      });
+    }
+    function resetAll() {
+      if (!confirm('确认重置所有单元格？这会清空样本、基因与CT。')) return;
+      const all = Array.from(document.querySelectorAll('#grid td'));
+      all.forEach(td => {
+        td.classList.remove('selected','only-sample','only-gene','both-values');
+        td.dataset.sampleName = ''; td.dataset.targetGene=''; td.dataset.ct='';
+      });
+      requestAnimationFrame(() => {
+        all.forEach(td => { td.title=''; td.innerHTML=''; updateCellAppearance(td); });
+        updateSidebarInputs();
+      });
+    }
+
+
+
+    // XLSX export
+    function generateXLSX() {
+      // 1) 基因列：按出现顺序去重
+      const geneOrder = [];
+      const seenGene = new Set();
+      for (let r=0; r<rows; r++) {
+        for (let c=1; c<=cols; c++) {
+          const td = document.querySelector(`td[data-row="${rowLabels[r]}"][data-col="${c}"]`);
+          const g = td.dataset.targetGene || '';
+          if (g && !seenGene.has(g)) { seenGene.add(g); geneOrder.push(g); }
+        }
+      }
+      if (geneOrder.length === 0) { alert('未检测到任何基因名，无法导出xlsx'); return; }
+      // 2) 分组样本：group -> gene -> [ct...]
+      const groupMap = new Map();
+      for (let r=0; r<rows; r++) {
+        for (let c=1; c<=cols; c++) {
+          const td = document.querySelector(`td[data-row="${rowLabels[r]}"][data-col="${c}"]`);
+          const s = td.dataset.sampleName || '';
+          const g = td.dataset.targetGene || '';
+          const ct = td.dataset.ct || '';
+          if (!s || !g) continue;
+          if (!groupMap.has(s)) groupMap.set(s, new Map());
+          const gmap = groupMap.get(s);
+          if (!gmap.has(g)) gmap.set(g, []);
+          if (ct) gmap.get(g).push(ct);
+          else gmap.get(g).push('NA');
+        }
+      }
+      if (groupMap.size === 0) { alert('未检测到样本与基因配对，无法导出xlsx'); return; }
+
+      // 3) 组装数据表
+      const header = ['num','group name', ...geneOrder];
+      const data = [header];
+      // 累计行号，从1开始；num仅在每组首行写入，其余行留空
+      let currentIndex = 1;
+      for (const [group, gmap] of groupMap.entries()) {
+        // 每组行数为所有基因样本的最大长度（代表重复次数）
+        let rowsCount = 0;
+        geneOrder.forEach(g => {
+          const arr = gmap.get(g) || [];
+          rowsCount = Math.max(rowsCount, arr.length);
+        });
+        if (rowsCount === 0) rowsCount = 1; // 至少一行
+        for (let i=0; i<rowsCount; i++) {
+          const numVal = i === 0 ? currentIndex : '';
+          const groupVal = i === 0 ? group : '';
+          const row = [numVal, groupVal];
+          geneOrder.forEach(g => {
+            const arr = gmap.get(g) || [];
+            const v = arr[i] !== undefined ? arr[i] : 'NA';
+            row.push(v);
+          });
+          data.push(row);
+        }
+        currentIndex += rowsCount;
+      }
+
+      // 4) 生成xlsx（列宽、表头加粗、数值格式、工作表名≤31）
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      // 列宽：num(8), group(20), genes(14)
+      ws['!cols'] = [{ wch: 8 }, { wch: 20 }, ...geneOrder.map(() => ({ wch: 14 }))];
+
+      const ref = ws['!ref'];
+      if (ref) {
+        const range = XLSX.utils.decode_range(ref);
+        // 表头加粗（样式支持依赖Excel版本）
+        for (let c = 0; c <= range.e.c; c++) {
+          const addr = XLSX.utils.encode_cell({ r: 0, c });
+          if (ws[addr]) ws[addr].s = Object.assign({}, ws[addr].s || {}, { font: { bold: true } });
+        }
+        // 数值格式为0.00（跳过num和group两列）
+        for (let r = 1; r <= range.e.r; r++) {
+          for (let c = 2; c <= range.e.c; c++) {
+            const addr = XLSX.utils.encode_cell({ r, c });
+            const cell = ws[addr];
+            if (!cell) continue;
+            const num = typeof cell.v === 'number' ? cell.v : parseFloat(String(cell.v));
+            if (Number.isFinite(num)) {
+              cell.v = num;
+              cell.t = 'n';
+              cell.z = '0.00';
+            }
+          }
+        }
+      }
+
+      const inst = document.getElementById('instrument').value;
+      const instLabel = inst === 'roche' ? 'Roche' : 'BioRad';
+      let wsName = `PlateExport_${instLabel}`;
+      wsName = wsName.slice(0, 31); // 兼容Excel工作表名长度限制
+      XLSX.utils.book_append_sheet(wb, ws, wsName);
+
+      // 追加 Summary 统计工作表：每样本×基因的 N/Missing/Mean/StdDev
+      const summaryHeader = ['group name','gene','N','Missing','Mean','StdDev'];
+      const summaryData = [summaryHeader];
+      for (const [group, gmap] of groupMap.entries()) {
+        geneOrder.forEach(g => {
+          const arr = gmap.get(g) || [];
+          const nums = arr
+            .map(v => (typeof v === 'number' ? v : parseFloat(String(v))))
+            .filter(v => Number.isFinite(v));
+          const N = nums.length;
+          const Missing = arr.length - N;
+          let Mean = '';
+          let Std = '';
+          if (N > 0) {
+            const sum = nums.reduce((a,b) => a + b, 0);
+            Mean = sum / N;
+            if (N > 1) {
+              const mean = Mean;
+              const variance = nums.reduce((a,b) => a + Math.pow(b - mean, 2), 0) / (N - 1);
+              Std = Math.sqrt(variance);
+            }
+          }
+          summaryData.push([group, g, N, Missing, Mean, Std]);
+        });
+      }
+      const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+      wsSummary['!cols'] = [
+        { wch: 20 }, // group
+        { wch: 14 }, // gene
+        { wch: 6 },  // N
+        { wch: 8 },  // Missing
+        { wch: 10 }, // Mean
+        { wch: 10 }  // StdDev
+      ];
+      // 数值格式与类型设定
+      const sref = wsSummary['!ref'];
+      if (sref) {
+        const sr = XLSX.utils.decode_range(sref);
+        // 表头加粗
+        for (let c = 0; c <= sr.e.c; c++) {
+          const addr = XLSX.utils.encode_cell({ r: 0, c });
+          if (wsSummary[addr]) wsSummary[addr].s = Object.assign({}, wsSummary[addr].s || {}, { font: { bold: true } });
+        }
+        // 行1开始是数据行：N/Missing设为数字；Mean/StdDev设为数字并格式0.00
+        for (let r = 1; r <= sr.e.r; r++) {
+          // N
+          const nAddr = XLSX.utils.encode_cell({ r, c: 2 });
+          if (wsSummary[nAddr] && Number.isFinite(parseFloat(String(wsSummary[nAddr].v)))) {
+            wsSummary[nAddr].v = parseInt(String(wsSummary[nAddr].v), 10);
+            wsSummary[nAddr].t = 'n';
+            wsSummary[nAddr].z = '0';
+          }
+          // Missing
+          const mAddr = XLSX.utils.encode_cell({ r, c: 3 });
+          if (wsSummary[mAddr] && Number.isFinite(parseFloat(String(wsSummary[mAddr].v)))) {
+            wsSummary[mAddr].v = parseInt(String(wsSummary[mAddr].v), 10);
+            wsSummary[mAddr].t = 'n';
+            wsSummary[mAddr].z = '0';
+          }
+          // Mean
+          const meanAddr = XLSX.utils.encode_cell({ r, c: 4 });
+          if (wsSummary[meanAddr] && Number.isFinite(parseFloat(String(wsSummary[meanAddr].v)))) {
+            const num = parseFloat(String(wsSummary[meanAddr].v));
+            wsSummary[meanAddr].v = num;
+            wsSummary[meanAddr].t = 'n';
+            wsSummary[meanAddr].z = '0.00';
+          }
+          // StdDev
+          const stdAddr = XLSX.utils.encode_cell({ r, c: 5 });
+          if (wsSummary[stdAddr] && Number.isFinite(parseFloat(String(wsSummary[stdAddr].v)))) {
+            const num = parseFloat(String(wsSummary[stdAddr].v));
+            wsSummary[stdAddr].v = num;
+            wsSummary[stdAddr].t = 'n';
+            wsSummary[stdAddr].z = '0.00';
+          }
+        }
+      }
+      let wsName2 = 'Summary';
+      wsName2 = wsName2.slice(0, 31);
+      // Summary追加到同一工作簿的独立工作表
+      XLSX.utils.book_append_sheet(wb, wsSummary, wsName2);
+
+      let fname = document.getElementById('xlsxFileName').value.trim();
+      if (!fname) {
+        const now = new Date();
+        const ds = now.toISOString().slice(0,10);
+        const ts = now.toTimeString().slice(0,5).replace(':','-');
+        const inst2 = document.getElementById('instrument').value;
+        const instLabel2 = inst2 === 'roche' ? 'Roche' : 'BioRad';
+        fname = `PlateExport_${instLabel2}_${ds}_${ts}.xlsx`;
+      } else if (!fname.endsWith('.xlsx')) {
+        fname += '.xlsx';
+      }
+      XLSX.writeFile(wb, fname);
+
+      // 导出当前孔板视图截图（PNG）
+      downloadPlateScreenshot(fname);
+    }
+
+    // 导出孔板视图为PNG
+    function downloadPlateScreenshot(baseName) {
+      const node = document.getElementById('stageWrap');
+      const inst = document.getElementById('instrument').value;
+      const instLabel = inst === 'roche' ? 'Roche' : 'BioRad';
+      const pngName = baseName && baseName.endsWith('.xlsx')
+        ? baseName.replace('.xlsx', `_${instLabel}_plate.png`)
+        : `PlateExport_${instLabel}_plate.png`;
+      html2canvas(node, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
+        canvas.toBlob(blob => {
+          const a = document.createElement('a');
+          const url = URL.createObjectURL(blob);
+          a.href = url;
+          a.download = pngName;
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+      });
+    }
+
+    // Zoom & Pan
+    const stage = document.getElementById('stage');
+    const stageWrap = document.getElementById('stageWrap');
+    const zoomRange = document.getElementById('zoomRange');
+    const viewStatus = document.getElementById('viewStatus');
+    let scale = 1;
+    let tx = 0, ty = 0;
+    let panning = false;
+    let panStart = {x:0,y:0};
+    let viewStart = {x:0,y:0};
+
+    // 居中网格显示（对称美学）
+    function centerPlate() {
+      // 以未缩放前的网格宽高估算居中位置
+      const gridNode = document.getElementById('grid');
+      const wrapRect = stageWrap.getBoundingClientRect();
+      const gridRect = gridNode.getBoundingClientRect();
+      // gridRect 是当前变换后的尺寸，反算原始尺寸
+      const gridW = gridRect.width / scale;
+      const gridH = gridRect.height / scale;
+      tx = Math.round((wrapRect.width - gridW) / 2);
+      ty = Math.round((wrapRect.height - gridH) / 2);
+      applyTransform();
+    }
+
+    function applyTransform() {
+      stage.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+      viewStatus.textContent = `scale:${scale.toFixed(2)}, x:${Math.round(tx)}, y:${Math.round(ty)}`;
+    }
+
+    stageWrap.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = stage.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      const delta = -Math.sign(e.deltaY) * 0.05; // up->zoom in
+      const newScale = Math.min(2, Math.max(0.5, scale + delta));
+
+      // 以鼠标为近似中心缩放：调整平移保持焦点位置相对稳定
+      const k = newScale / scale;
+      tx = mx - k * mx + k * tx;
+      ty = my - k * my + k * ty;
+      scale = newScale;
+      zoomRange.value = scale.toFixed(2);
+      applyTransform();
+    }, { passive:false });
+
+    // Pan when holding Space or middle button
+    stageWrap.addEventListener('mousedown', (e) => {
+      if (e.button === 1 || e.buttons === 4 || spacePressed) {
+        e.preventDefault();
+        panning = true;
+        panStart = { x: e.clientX, y: e.clientY };
+        viewStart = { x: tx, y: ty };
+      }
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!panning) return;
+      const dx = e.clientX - panStart.x;
+      const dy = e.clientY - panStart.y;
+      tx = viewStart.x + dx;
+      ty = viewStart.y + dy;
+      applyTransform();
+    });
+    window.addEventListener('mouseup', () => { panning = false; });
+    let spacePressed = false;
+    window.addEventListener('keydown', (e) => { if (e.code === 'Space') spacePressed = true; });
+    window.addEventListener('keyup', (e) => { if (e.code === 'Space') spacePressed = false; });
+
+    zoomRange.addEventListener('input', () => {
+      const newScale = parseFloat(zoomRange.value);
+      // 缩放中心用视口中心
+      const rect = stageWrap.getBoundingClientRect();
+      const mx = rect.width/2;
+      const my = rect.height/2;
+      const k = newScale / scale;
+      tx = mx - k * mx + k * tx;
+      ty = my - k * my + k * ty;
+      scale = newScale;
+      applyTransform();
+    });
+    document.getElementById('resetView').addEventListener('click', () => {
+      scale = 1;
+      zoomRange.value = '1';
+      centerPlate();
+    });
+
+    // Wire buttons
+    document.getElementById('applyBtn').addEventListener('click', applyValues);
+    document.getElementById('removeSelBtn').addEventListener('click', removeSelections);
+    document.getElementById('clearSampleBtn').addEventListener('click', clearSelectedSampleNames);
+    document.getElementById('clearGeneBtn').addEventListener('click', clearSelectedTargetGenes);
+    document.getElementById('clearValuesBtn').addEventListener('click', clearSelectedValues);
+    document.getElementById('resetAllBtn').addEventListener('click', resetAll);
+
+    document.getElementById('exportXLSXBtn').addEventListener('click', generateXLSX);
+
+    // Excel 导入
+    // Web Worker：在后台解析Excel，主线程仅负责渲染与UI
+    let excelWorker = null;
+    function initExcelWorker() {
+      const workerCode = `
+self.importScripts('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+function readRowsWithHeader(ws, required) {
+  const a2 = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+  let headerIdx = -1;
+  let header = null;
+  for (let i = 0; i < a2.length; i++) {
+    const row = a2[i].map(v => String(v).trim());
+    const lower = row.map(v => v.toLowerCase());
+    const ok = required.every(key => lower.includes(key.toLowerCase()));
+    if (ok) { headerIdx = i; header = row; break; }
+  }
+  if (headerIdx === -1) return [];
+  const rows = [];
+  for (let i = headerIdx + 1; i < a2.length; i++) {
+    const r = a2[i];
+    if (!r || r.length === 0) continue;
+    const obj = {};
+    header.forEach((h, idx) => { obj[String(h).trim()] = r[idx]; });
+    rows.push(obj);
+  }
+  return rows;
+}
+function getVal(obj, names) {
+  for (const n of names) {
+    const k = Object.keys(obj).find(key => key.toLowerCase() === n.toLowerCase());
+    if (k) return obj[k];
+  }
+  return '';
+}
+self.onmessage = function(e) {
+  const { buffer } = e.data;
+  let detected = null;
+  let imported = 0;
+  const wb = XLSX.read(buffer, { type: 'array' });
+  const results = [];
+  for (const sheetName of wb.SheetNames) {
+    const ws = wb.Sheets[sheetName];
+    // Try Bio-Rad
+    let rows = readRowsWithHeader(ws, ['Well','Target','Sample','Cq']);
+    if (rows.length > 0) {
+      detected = 'biorad';
+      for (const row of rows) {
+        const well = getVal(row, ['Well']);
+        const target = getVal(row, ['Target']);
+        const sample = getVal(row, ['Sample']);
+        const cq = getVal(row, ['Cq']);
+        results.push({ pos: well, sample, gene: target, ct: cq });
+        imported++;
+      }
+      continue;
+    }
+    // Try Roche
+    rows = readRowsWithHeader(ws, ['Pos','Name','Cp']);
+    if (rows.length > 0) {
+      detected = detected || 'roche';
+      for (const row of rows) {
+        const pos = getVal(row, ['Pos']);
+        const name = getVal(row, ['Name']);
+        const cp = getVal(row, ['Cp']);
+        results.push({ pos, sample: name, gene: pos, ct: cp });
+        imported++;
+      }
+      continue;
+    }
+  }
+  self.postMessage({ detected, imported, results });
+};
+`;
+      const blob = new Blob([workerCode], { type: 'application/javascript' });
+      const url = URL.createObjectURL(blob);
+      excelWorker = new Worker(url);
+    }
+    function normalizePos(pos) {
+      if (!pos) return null;
+      const m = String(pos).trim().toUpperCase().match(/^([A-P])0*([1-9]|1[0-9]|2[0-4])$/);
+      if (!m) return null;
+      return m[1] + String(parseInt(m[2], 10));
+    }
+    function setCellByPos(pos, sample, gene, ct) {
+      const norm = normalizePos(pos);
+      if (!norm) return false;
+      const row = norm[0];
+      const col = parseInt(norm.slice(1), 10);
+      const td = document.querySelector(`td[data-row="${row}"][data-col="${col}"]`);
+      if (!td) return false;
+      if (sample !== undefined) td.dataset.sampleName = sample || '';
+      if (gene !== undefined) td.dataset.targetGene = gene || '';
+      if (ct !== undefined) td.dataset.ct = ct !== '' && ct !== null && ct !== undefined ? String(ct) : '';
+      updateCellAppearance(td);
+      return true;
+    }
+    function readRowsWithHeader(ws, required) {
+      // 以 header:1 读取二维数组，查找包含所需列的表头行
+      const a2 = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      let headerIdx = -1;
+      let header = null;
+      for (let i = 0; i < a2.length; i++) {
+        const row = a2[i].map(v => String(v).trim());
+        const lower = row.map(v => v.toLowerCase());
+        const ok = required.every(key => lower.includes(key.toLowerCase()));
+        if (ok) { headerIdx = i; header = row; break; }
+      }
+      if (headerIdx === -1) return [];
+      const rows = [];
+      for (let i = headerIdx + 1; i < a2.length; i++) {
+        const r = a2[i];
+        if (!r || r.length === 0) continue;
+        const obj = {};
+        header.forEach((h, idx) => { obj[String(h).trim()] = r[idx]; });
+        rows.push(obj);
+      }
+      return rows;
+    }
+    function getVal(obj, names) {
+      for (const n of names) {
+        const k = Object.keys(obj).find(key => key.toLowerCase() === n.toLowerCase());
+        if (k) return obj[k];
+      }
+      return '';
+    }
+    async function importExcelFile(file) {
+      const buf = await file.arrayBuffer();
+      if (!excelWorker) initExcelWorker();
+      return new Promise((resolve) => {
+        excelWorker.onmessage = (e) => {
+          const { detected, imported, results } = e.data || {};
+          let countSet = 0;
+          if (Array.isArray(results)) {
+            results.forEach(({ pos, sample, gene, ct }) => {
+              if (setCellByPos(pos, sample, gene, ct)) countSet++;
+            });
+          }
+          if (!detected || imported === 0 || countSet === 0) {
+            alert('未识别到有效的Bio-Rad或Roche数据表头，请检查Excel文件格式。');
+            resolve({ detected: null, imported: 0 });
+            return;
+          }
+          const instSel = document.getElementById('instrument');
+          if (detected === 'biorad') instSel.value = 'biorad';
+          else if (detected === 'roche') instSel.value = 'roche';
+          alert(`导入完成：${detected === 'biorad' ? 'Bio-Rad' : 'Roche'} 数据，共更新 ${countSet} 个孔位。`);
+          resolve({ detected, imported: countSet });
+        };
+        // 将ArrayBuffer转移到Worker，避免复制
+        excelWorker.postMessage({ buffer: buf }, [buf]);
+      });
+    }
+
+    document.getElementById('importExcelBtn').addEventListener('click', async () => {
+      const input = document.getElementById('excelFile');
+      const file = input.files && input.files[0];
+      if (!file) { alert('请选择Excel文件'); return; }
+      const shouldClear = document.getElementById('clearBeforeImport').checked;
+      if (shouldClear) {
+        document.querySelectorAll('#grid td').forEach(td => {
+          td.classList.remove('selected','only-sample','only-gene','both-values');
+          td.dataset.sampleName = ''; td.dataset.targetGene = ''; td.dataset.ct = '';
+          td.title=''; td.innerHTML='';
+        });
+      }
+      await importExcelFile(file);
+      updateSidebarInputs();
+      input.value = '';
+    });
+
+    // Init
+    createGrid();
+    // Initialize cell dataset
+    document.querySelectorAll('#grid td').forEach(td => { td.dataset.sampleName=''; td.dataset.targetGene=''; td.dataset.ct=''; });
+    // 初始居中
+    centerPlate();
+    // 窗口尺寸变化时保持居中
+    window.addEventListener('resize', () => { centerPlate(); });
+  </script>
+</body>
+</html>
