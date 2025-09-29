@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>384孔板编辑与导出</title>
+  <title>PlateEditor</title>
   <style>
     body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans SC', sans-serif; background:#f5f7fa; margin:0; }
     .container { display:flex; gap:0; height: 100vh; }
@@ -63,61 +63,54 @@
 
     <div class="right">
       <div class="sidebar">
-        <h2>384-well Plateeditor</h2>
+        <h2>PlateEditor</h2>
 
         <div class="form-row">
           <label for="instrument">仪器类型</label>
           <select id="instrument">
-            <option value="roche">Roche (Cp)</option>
-            <option value="biorad">Bio-Rad (Cq)</option>
+            <option value="biorad">Bio-Rad CFX384</option>
+            <option value="roche">Roche LightCycler® 480</option>
           </select>
         </div>
 
-        <h2 style="margin-top:16px;">Excel导入（.xlsx/.xls）</h2>
+        <h2 style="margin-top:16px;">导入（.xlsx/.xls）</h2>
         <div class="form-row">
-          <label for="excelFile">选择Excel文件</label>
+          <label for="excelFile">选择文件</label>
           <input type="file" id="excelFile" accept=".xlsx,.xls">
         </div>
-        <div class="form-row" style="display:flex; align-items:center; gap:8px;">
-          <input type="checkbox" id="clearBeforeImport" checked>
-          <label for="clearBeforeImport" style="margin:0;">导入前清空板</label>
-        </div>
-        <button class="btn btn-primary" id="importExcelBtn">导入Excel</button>
+        <button class="btn btn-primary" id="importExcelBtn">导入</button>
 
-        <p class="small">说明：自动识别 Bio-Rad（Well/Target/Sample/Cq）或 Roche（Pos/Name/Cp）。Roche导入时用 Pos 预填充“基因名”（如 A1、B12），导入后可在右侧修改为真实基因。</p>
 
         <div class="form-row">
-          <label for="sampleName">样本名 (group)</label>
-          <input type="text" id="sampleName" placeholder="输入样本名">
+          <label for="targetGene">Gene</label>
+          <input type="text" id="targetGene" placeholder="Enter the gene name">
         </div>
-
+          
         <div class="form-row">
-          <label for="targetGene">基因名</label>
-          <input type="text" id="targetGene" placeholder="输入基因名">
+          <label for="sampleName">Sample</label>
+          <input type="text" id="sampleName" placeholder="Enter the sample name">
         </div>
 
-        <p class="small">CT值由Excel导入自动读取并显示（Roche=Cp，Bio-Rad=Cq），不可在此处编辑。</p>
+        <p class="small">CT值自动读取但不可编辑，缺失值填充NA。</p>
 
         <button class="btn btn-primary" id="applyBtn">应用到选中</button>
-        <button class="btn btn-gray" id="removeSelBtn">清除选中状态</button>
-        <button class="btn btn-orange" id="clearSampleBtn">清空选中样本名</button>
-        <button class="btn btn-orange" id="clearGeneBtn">清空选中基因名</button>
-        <button class="btn btn-orange" id="clearValuesBtn">清空选中值</button>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+          <button class="btn btn-gray" id="removeSelBtn">清除选中状态</button>
+          <button class="btn btn-gray" id="clearSampleBtn">清空选中样本名</button>
+          <button class="btn btn-gray" id="clearGeneBtn">清空选中基因名</button>
+          <button class="btn btn-gray" id="clearValuesBtn">清空选中值</button>
+        </div>
+
         <button class="btn btn-red" id="resetAllBtn">重置所有单元格</button>
 
 
-
-
-
-
-        <p class="small">导出xlsx的“num”为组内行序号（从1开始）；基因列按板中“出现顺序”去重生成；无值填NA。CT显示取决于仪器类型：Roche显示Cp，Bio-Rad显示Cq。</p>
-
-        <h2 style="margin-top:16px;">导出xlsx</h2>
+        <h2 style="margin-top:16px;">Export</h2>
         <div class="form-row">
-          <label for="xlsxFileName">xlsx 文件名</label>
+          <label for="xlsxFileName">FileName</label>
           <input type="text" id="xlsxFileName" placeholder="可选，默认时间戳">
         </div>
-        <button class="btn btn-green" id="exportXLSXBtn">导出xlsx</button>
+        <button class="btn btn-green" id="exportXLSXBtn">导出</button>
       </div>
     </div>
   </div>
@@ -794,14 +787,12 @@ self.onmessage = function(e) {
       const input = document.getElementById('excelFile');
       const file = input.files && input.files[0];
       if (!file) { alert('请选择Excel文件'); return; }
-      const shouldClear = document.getElementById('clearBeforeImport').checked;
-      if (shouldClear) {
-        document.querySelectorAll('#grid td').forEach(td => {
-          td.classList.remove('selected','only-sample','only-gene','both-values');
-          td.dataset.sampleName = ''; td.dataset.targetGene = ''; td.dataset.ct = '';
-          td.title=''; td.innerHTML='';
-        });
-      }
+      document.querySelectorAll('#grid td').forEach(td => {
+        td.classList.remove('selected','only-sample','only-gene','both-values');
+        td.dataset.sampleName = ''; td.dataset.targetGene = ''; td.dataset.ct = '';
+        td.title=''; td.innerHTML='';
+      });
+      
       await importExcelFile(file);
       updateSidebarInputs();
       input.value = '';
@@ -818,3 +809,5 @@ self.onmessage = function(e) {
   </script>
 </body>
 </html>
+
+// Designed by Guanghan Fan & Tecent Codebuddy
