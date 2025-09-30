@@ -1,178 +1,459 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PlateEditor</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧬</text></svg>">
   <style>
-    body { 
-      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans SC', sans-serif; 
-      background: #f8fafc; 
-      margin: 0; 
+    /* 谷歌设计规范 + HyperOS9冷色系 */
+    :root {
+      --primary: #4285F4;
+      --primary-dark: #3367D6;
+      --secondary: #9AA0A6;
+      --success: #34A853;
+      --warning: #FBBC05;
+      --danger: #EA4335;
+      --surface: #FFFFFF;
+      --surface-alt: #F8F9FA;
+      --border: #DADCE0;
+      --text-primary: #3C4043;
+      --text-secondary: #5F6368;
+      --text-muted: #80868B;
+      --shadow-sm: 0 1px 2px rgba(60,64,67,0.3);
+      --shadow-md: 0 2px 6px rgba(60,64,67,0.15);
+      --shadow-lg: 0 4px 12px rgba(60,64,67,0.15);
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --blur-bg: rgba(255,255,255,0.95);
     }
+    
+    body { 
+      font-family: 'Roboto', 'Noto Sans SC', 'Microsoft YaHei', sans-serif; 
+      background: linear-gradient(135deg, #F1F3F4 0%, #E8EAED 100%); 
+      margin: 0; 
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100vh;
+    }
+    
     .container { 
       display: flex; 
       gap: 0; 
       height: 100vh; 
+      max-height: 100vh;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      margin: 8px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
     }
+    
     .left { 
       flex: 1; 
       display: flex; 
       flex-direction: column; 
+      background: var(--surface);
+      border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+      border-right: 1px solid var(--border);
     }
+    
     .stage-wrap { 
       flex: 1; 
       position: relative; 
       overflow: hidden; 
-      background: #ffffff; 
-      border-right: 1px solid #e2e8f0;
+      background: var(--surface); 
+      border-right: 1px solid var(--border);
     }
+    
     .stage { 
       position: absolute; 
       left: 0; 
       top: 0; 
       transform-origin: 0 0; 
     }
+    
     .grid-container { 
-      padding: 16px; 
+      padding: 20px; 
+      background: var(--surface);
     }
+    
     #grid { 
-      border-collapse: collapse; 
-      background: #ffffff; 
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border-collapse: separate; 
+      border-spacing: 1px;
+      background: var(--surface); 
+      box-shadow: var(--shadow-md);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border);
     }
+    
     #grid th, #grid td { 
-      border: 1px solid #e2e8f0;
-      width: 35px; 
-      height: 35px; 
+      border: 1px solid var(--border);
+      width: 38px; 
+      height: 38px; 
       text-align: center; 
       vertical-align: middle; 
-      font-size: 12px; 
-      line-height: 1.4; 
+      font-size: 11px; 
+      line-height: 1.2; 
+      transition: all 0.15s ease;
+      background: var(--surface);
     }
+    
     #grid th { 
-      background: #f1f5f9; 
+      background: linear-gradient(135deg, #F8F9FA 0%, #E8EAED 100%); 
       font-weight: 600; 
       cursor: pointer; 
       user-select: none; 
-      color: #0f172a; 
+      color: var(--text-primary); 
       position: sticky; 
       z-index: 1; 
+      border-bottom: 2px solid var(--border);
+      font-size: 10px;
+      letter-spacing: 0.3px;
     }
+    
+    #grid th:hover {
+      background: linear-gradient(135deg, #E8F0FE 0%, #D2E3FC 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 1px 4px rgba(26,115,232,0.2);
+    }
+    
     #grid td { 
       cursor: pointer; 
-      background: #ffffff; 
+      background: var(--surface); 
+      position: relative;
     }
+    
+    #grid td:hover {
+      background: #F8F9FA;
+      transform: scale(1.02);
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(26,115,232,0.15);
+      border-color: var(--primary);
+    }
+    
     #grid td.selected { 
-      outline: 2px solid #0ea5e9; 
-      outline-offset: -2px; 
+      outline: 2px solid var(--primary); 
+      outline-offset: -1px; 
+      background: rgba(26,115,232,0.08);
+      box-shadow: 0 0 0 1px var(--primary) inset;
+      position: relative;
+      z-index: 10;
+      border-color: var(--primary);
     }
+    
+    #grid td.selected::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      right: -1px;
+      bottom: -1px;
+      border: 2px solid var(--primary);
+      border-radius: 2px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+    
     #grid td.only-sample { 
-      background-color: #fef3c7; 
+      background: linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%); 
+      color: #2D3748; 
+      font-weight: 500;
+      border: 1px solid #FFEB3B;
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.8);
     }
+    
     #grid td.only-gene { 
-      background-color: #ddd6fe; 
+      background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); 
+      color: #2D3748; 
+      font-weight: 500;
+      border: 1px solid #90CAF9;
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.8);
     }
+    
     #grid td.both-values { 
-      background-color: #d1fae5; 
+      background: linear-gradient(135deg, #E8F5E8 0%, #C8E6C9 100%); 
+      color: #2D3748; 
+      font-weight: 500;
+      border: 1px solid #A5D6A7;
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.8);
     }
+    
     .value-text { 
       display: inline-block; 
-      padding: 2px 2px; 
-      border: 1px solid #cbd5e1;
+      padding: 2px 4px; 
+      border: 1px solid rgba(0,0,0,0.1);
       border-radius: 4px; 
       margin: 1px 0; 
+      font-weight: 500;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+      font-size: 10px;
     }
+    
     .target-gene { 
       font-style: italic; 
+      font-weight: 500;
     }
+    
     .toolbar { 
-      padding: 12px 16px; 
-      border-top: 1px solid #e2e8f0; 
-      background: #f8fafc;
+      padding: 12px 20px; 
+      border-top: 1px solid var(--border); 
+      background: var(--surface);
       display: flex; 
       align-items: center; 
       gap: 12px; 
+      min-height: 52px;
     }
+    
     .right { 
-      width: 320px; 
-      background: #f1f5f9;
-      border-left: 1px solid #e2e8f0; 
+      width: 280px; 
+      background: var(--surface);
+      border-left: 1px solid var(--border); 
       display: flex; 
       flex-direction: column; 
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      box-shadow: -1px 0 8px rgba(60,64,67,0.1);
+      overflow: hidden;
+      flex-shrink: 0;
     }
+    
     .sidebar { 
       padding: 16px; 
-      overflow: auto; 
+      overflow: visible; 
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: calc(100vh - 32px);
+      box-sizing: border-box;
     }
+    
     .sidebar h2 { 
-      margin: 0 0 12px; 
-      font-size: 16px; 
-      font-weight: 700; 
-      color: #0f172a;
+      margin: 0; 
+      font-size: 14px; 
+      font-weight: 600; 
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 0 4px 0;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: 0.2px;
     }
+    
+    .sidebar h2::before {
+      content: "🧬";
+      font-size: 16px;
+    }
+    
     .form-row { 
-      margin-bottom: 12px; 
+      margin-bottom: 0; 
+      padding: 6px 0;
+      border-bottom: 1px solid var(--surface-alt);
     }
+    
     .form-row label { 
       display: block; 
-      font-size: 12px; 
-      color: #334155;
+      font-size: 11px; 
+      color: var(--text-secondary);
       margin-bottom: 6px; 
+      font-weight: 500;
+      letter-spacing: 0.2px;
     }
+    
     .form-row input, .form-row select { 
       width: 100%; 
-      padding: 8px; 
-      border: 1px solid #cbd5e1;
-      border-radius: 6px; 
+      padding: 8px 12px; 
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm); 
       font-size: 13px; 
-      background: #ffffff; 
+      background: var(--surface); 
+      transition: all 0.15s ease;
+      font-family: 'Roboto', 'Noto Sans SC', sans-serif;
+      box-sizing: border-box;
     }
+    
+    .form-row input:focus, .form-row select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+    }
+    
+    .form-row input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+    
     .btn { 
       width: 100%; 
-      padding: 10px; 
+      padding: 10px 12px; 
       font-size: 13px; 
       font-weight: 600; 
       color: #ffffff;
       border: none; 
-      border-radius: 6px; 
+      border-radius: var(--radius-sm); 
       cursor: pointer; 
       margin-bottom: 8px; 
+      transition: all 0.15s ease;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.2px;
     }
+    
+    .btn-large { 
+      padding: 14px 16px; 
+      font-size: 15px; 
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.3s;
+    }
+    
+    .btn:hover::before {
+      left: 100%;
+    }
+    
     .btn-primary { 
-      background: #0ea5e9;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); 
+      box-shadow: 0 2px 8px rgba(142,197,252,0.2);
     }
+    
     .btn-gray { 
-      background: #64748b;
+      background: linear-gradient(135deg, var(--secondary) 0%, #B0B0B5 100%); 
     }
+    
     .btn-orange { 
-      background: #f59e0b;
+      background: linear-gradient(135deg, var(--warning) 0%, #FFC085 100%); 
     }
+    
     .btn-red { 
-      background: #ef4444;
+      background: linear-gradient(135deg, var(--danger) 0%, #FF8C94 100%); 
+      box-shadow: 0 2px 8px rgba(255,179,186,0.2);
     }
+    
     .btn-green { 
-      background: #10b981;
+      background: linear-gradient(135deg, var(--success) 0%, #8CDBB5 100%); 
+      box-shadow: 0 2px 8px rgba(168,230,207,0.2);
     }
+    
     .btn:hover { 
-      filter: brightness(0.95); 
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
     }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
     .small { 
-      font-size: 12px; 
-      color: #64748b;
+      font-size: 11px; 
+      color: var(--text-muted);
     }
-    #grid td {
+    
+    #grid td, #grid th {
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
     }
-  
-    #grid th {
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
+    
+    /* 紧凑布局优化 */
+    .compact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+    
+    .compact-grid .btn {
+      margin-bottom: 0;
+      padding: 6px;
+      font-size: 11px;
+    }
+    
+    /* 状态指示器 */
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 1px var(--success);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    /* iOS风格滚动条 */
+    .sidebar::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .sidebar::-webkit-scrollbar-track {
+      background: var(--surface-alt);
+      border-radius: 4px;
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+    
+    /* 文件上传按钮样式优化 */
+    input[type="file"] {
+      padding: 12px 16px;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      background: var(--surface-alt);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    input[type="file"]:hover {
+      border-color: var(--primary);
+      background: rgba(0, 122, 255, 0.05);
+    }
+    
+    input[type="file"]::file-selector-button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 12px;
+      transition: all 0.2s ease;
+    }
+    
+    input[type="file"]::file-selector-button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
     }
   </style>
   <!-- SheetJS for xlsx export -->
@@ -191,11 +472,13 @@
         </div>
       </div>
       <div class="toolbar">
-        <span class="small">缩放(滚轮)、平移(按住空格或中键拖拽)</span>
-        <label class="small">比例</label>
-        <input id="zoomRange" type="range" min="0.5" max="2" step="0.01" value="1" style="width:160px;">
-        <button id="resetView" class="btn btn-gray" style="width:auto; padding:6px 10px;">重置视图</button>
-        <span class="small" id="viewStatus">scale:1.00, x:0, y:0</span>
+        <div class="status-indicator">
+          <div class="status-dot"></div>
+          <span>Ready</span>
+        </div>
+        <input id="zoomRange" type="range" min="0.5" max="2" step="0.01" value="1" style="width:120px;" title="Zoom scale">
+        <button id="resetView" class="btn btn-gray" style="width:auto; padding:8px 12px; font-size:12px;">Reset</button>
+        <span class="small" id="viewStatus" style="margin-left:auto;">Scale:1.00</span>
       </div>
     </div>
 
@@ -204,51 +487,54 @@
         <h2>PlateEditor</h2>
 
         <div class="form-row">
-          <label for="instrument">仪器类型</label>
+          <label for="instrument">Instrument Type</label>
           <select id="instrument">
             <option value="biorad">Bio-Rad CFX384</option>
             <option value="roche">Roche LightCycler® 480</option>
           </select>
         </div>
 
-        <h2 style="margin-top:16px;">导入（.xlsx/.xls）</h2>
+        <h2 style="margin-top:20px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">Data Import</h2>
         <div class="form-row">
-          <label for="excelFile">选择文件</label>
+          <label for="excelFile">Select Excel File (Auto Import)</label>
           <input type="file" id="excelFile" accept=".xlsx,.xls">
         </div>
-        <button class="btn btn-primary" id="importExcelBtn">导入</button>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: -8px; margin-bottom: 12px;">
+          Data will be automatically imported after file selection
+        </div>
 
 
         <div class="form-row">
-          <label for="targetGene">Gene</label>
-          <input type="text" id="targetGene" placeholder="Enter the gene name">
+          <label for="targetGene">Target Gene</label>
+          <input type="text" id="targetGene" placeholder="Enter gene name">
         </div>
           
         <div class="form-row">
-          <label for="sampleName">Sample</label>
-          <input type="text" id="sampleName" placeholder="Enter the sample name">
+          <label for="sampleName">Sample Name</label>
+          <input type="text" id="sampleName" placeholder="Enter sample name">
         </div>
 
-        <p class="small">CT值不可编辑，缺失值以NA填充。</p>
+        <button class="btn btn-primary btn-large" id="applyBtn">Apply to Selected Wells</button>
 
-        <button class="btn btn-primary" id="applyBtn">应用到选中</button>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-          <button class="btn btn-gray" id="removeSelBtn">清除选中状态</button>
-          <button class="btn btn-gray" id="clearSampleBtn">清空选中样本名</button>
-          <button class="btn btn-gray" id="clearGeneBtn">清空选中基因名</button>
-          <button class="btn btn-gray" id="clearValuesBtn">清空选中值</button>
+        <div class="compact-grid">
+          <button class="btn btn-gray" id="removeSelBtn">Clear Selection</button>
+          <button class="btn btn-gray" id="clearSampleBtn">Clear Sample</button>
+          <button class="btn btn-gray" id="clearGeneBtn">Clear Gene</button>
+          <button class="btn btn-gray" id="clearValuesBtn">Clear Values</button>
         </div>
 
-        <button class="btn btn-red" id="resetAllBtn">重置所有单元格</button>
+        <button class="btn btn-red" id="resetAllBtn">🔄 Reset All Data</button>
 
 
-        <h2 style="margin-top:16px;">Export</h2>
+        <h2 style="margin-top:20px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">Data Export</h2>
         <div class="form-row">
-          <label for="xlsxFileName">FileName</label>
-          <input type="text" id="xlsxFileName" placeholder="可选，默认时间戳">
+          <label for="xlsxFileName">File Name</label>
+          <input type="text" id="xlsxFileName" placeholder="Default timestamp">
         </div>
-        <button class="btn btn-green" id="exportXLSXBtn">导出</button>
+        <button class="btn btn-green btn-large" id="exportXLSXBtn">Export Data</button>
+        <div style="text-align: center; margin-top: 8px; font-size: 10px; color: #80868B; font-style: normal;">
+          Designed by FGH & Tecent Codebuddy
+        </div>
       </div>
     </div>
   </div>
@@ -264,12 +550,12 @@
     let startElement = null;
     let dragType = null; // 'cell','row','col'
     // Colors
-    // 更清淡的浅色系调色板（pastel）
+    // MIUI风格色板 - 高对比度区分
     const colorPalette = [
-      '#ffe5e5','#fff0d6','#fff9cc','#eaffea','#e6f7ff',
-      '#e9f0ff','#eee9ff','#ffe9f7','#ffe9ef','#fff2e6',
-      '#fff6d9','#ecfff7','#e9f8ff','#f2e9ff','#ffe6f2',
-      '#ffece0','#f2ffe6','#eaffff','#f3eaff','#ffe8ec'
+      '#FF3B30','#FF9500','#FFCC00','#4CD964','#5AC8FA',
+      '#007AFF','#5856D6','#FF2D55','#FF3B30','#FF9500',
+      '#FFCC00','#4CD964','#5AC8FA','#007AFF','#5856D6',
+      '#FF2D55','#8E8E93','#C7C7CC','#D1D1D6','#E5E5EA'
     ];
     // 颜色映射采用LRU，避免无限增长
     const MAX_COLOR_MAP = 200;
@@ -284,8 +570,14 @@
           const firstKey = map.keys().next().value;
           map.delete(firstKey);
         }
-        const colorIndex = map.size % colorPalette.length;
-        map.set(value, colorPalette[colorIndex]);
+        // 使用非常浅的清淡配色
+        const lightColors = [
+          '#F8FBFF', '#F9F7FF', '#F7FFF7', '#FFFCF5', '#FFF5F8',
+          '#F5FFFE', '#FDFFF7', '#FFFEF5', '#F7F8FF', '#F7FFF9',
+          '#F5FEFF', '#F9F7FF', '#F7FFF7', '#FFFCF5', '#FFF5F8'
+        ];
+        const colorIndex = map.size % lightColors.length;
+        map.set(value, lightColors[colorIndex]);
       }
       return map.get(value);
     }
@@ -353,10 +645,11 @@
       }
     }
 
-    // Selection helpers
+    // Selection helpers - 无延迟框选
     function clearSelections() {
       document.querySelectorAll('#grid td.selected').forEach(td => td.classList.remove('selected'));
     }
+    
     window.startDrag = function(el, type) {
       isDragging = true;
       startElement = el;
@@ -373,21 +666,31 @@
       }
       updateSidebarInputs();
     };
+    
     window.dragSelect = function(el) {
       if (!isDragging) return;
+      
       clearSelections();
+      
+      // 直接执行，无延迟优化
       if (dragType === 'row' && el.dataset.row) {
         const s = rowLabels.indexOf(startElement.dataset.row);
         const e = rowLabels.indexOf(el.dataset.row);
         const min = Math.min(s,e), max = Math.max(s,e);
-        for (let r=min; r<=max; r++) {
+        // 边界控制：确保在有效行范围内
+        const validMin = Math.max(0, min);
+        const validMax = Math.min(rows - 1, max);
+        for (let r=validMin; r<=validMax; r++) {
           document.querySelectorAll(`td[data-row="${rowLabels[r]}"]`).forEach(td => td.classList.add('selected'));
         }
       } else if (dragType === 'col' && el.dataset.col) {
         const s = parseInt(startElement.dataset.col);
         const e = parseInt(el.dataset.col);
         const min = Math.min(s,e), max = Math.max(s,e);
-        for (let c=min; c<=max; c++) {
+        // 边界控制：确保在有效列范围内
+        const validMin = Math.max(1, min);
+        const validMax = Math.min(cols, max);
+        for (let c=validMin; c<=validMax; c++) {
           document.querySelectorAll(`td[data-col="${c}"]`).forEach(td => td.classList.add('selected'));
         }
       } else if (dragType === 'cell' && el.dataset.row && el.dataset.col) {
@@ -397,8 +700,16 @@
         const ec = parseInt(el.dataset.col);
         const rmin = Math.min(sr,er), rmax = Math.max(sr,er);
         const cmin = Math.min(sc,ec), cmax = Math.max(sc,ec);
-        for (let r=rmin; r<=rmax; r++) {
-          for (let c=cmin; c<=cmax; c++) {
+        
+        // 边界控制：确保在有效范围内
+        const validRmin = Math.max(0, rmin);
+        const validRmax = Math.min(rows - 1, rmax);
+        const validCmin = Math.max(1, cmin);
+        const validCmax = Math.min(cols, cmax);
+        
+        // 直接框选，无延迟
+        for (let r=validRmin; r<=validRmax; r++) {
+          for (let c=validCmin; c<=validCmax; c++) {
             const td = document.querySelector(`td[data-row="${rowLabels[r]}"][data-col="${c}"]`);
             if (td) td.classList.add('selected');
           }
@@ -406,7 +717,11 @@
       }
       updateSidebarInputs();
     };
-    window.endDrag = function() { isDragging = false; dragType = null; };
+    
+    window.endDrag = function() { 
+      isDragging = false; 
+      dragType = null; 
+    };
 
     // Apply values
     function applyValues() {
@@ -444,7 +759,7 @@
       });
     }
     function resetAll() {
-      if (!confirm('确认重置所有单元格？这会清空样本、基因与CT。')) return;
+      if (!confirm('Confirm reset all cells? This will clear all sample, gene and CT data.')) return;
       const all = Array.from(document.querySelectorAll('#grid td'));
       all.forEach(td => {
         td.classList.remove('selected','only-sample','only-gene','both-values');
@@ -458,6 +773,16 @@
 
 
 
+    // Get imported file name (without extension)
+    function getImportedFileName() {
+      const fileInput = document.getElementById('excelFile');
+      if (fileInput.files.length > 0) {
+        const fileName = fileInput.files[0].name;
+        return fileName.replace(/\.[^/.]+$/, ""); // Remove extension
+      }
+      return null;
+    }
+
     // XLSX export
     function generateXLSX() {
       // 1) 基因列：按出现顺序去重
@@ -470,7 +795,7 @@
           if (g && !seenGene.has(g)) { seenGene.add(g); geneOrder.push(g); }
         }
       }
-      if (geneOrder.length === 0) { alert('未检测到任何基因名，无法导出xlsx'); return; }
+      if (geneOrder.length === 0) { alert('No gene names detected, cannot export xlsx'); return; }
       // 2) 分组样本：group -> gene -> [ct...]
       const groupMap = new Map();
       for (let r=0; r<rows; r++) {
@@ -487,7 +812,7 @@
           else gmap.get(g).push('NA');
         }
       }
-      if (groupMap.size === 0) { alert('未检测到样本与基因配对，无法导出xlsx'); return; }
+      if (groupMap.size === 0) { alert('No sample-gene pairs detected, cannot export xlsx'); return; }
 
       // 3) 组装数据表
       const header = ['num','group name', ...geneOrder];
@@ -516,7 +841,7 @@
         currentIndex += rowsCount;
       }
 
-      // 4) 生成xlsx（列宽、表头加粗、数值格式、工作表名≤31）
+      // 4) 生成xlsx（列宽、表头加粗、数值格式左对齐、工作表名≤31）
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(data);
       // 列宽：num(8), group(20), genes(14)
@@ -529,6 +854,15 @@
         for (let c = 0; c <= range.e.c; c++) {
           const addr = XLSX.utils.encode_cell({ r: 0, c });
           if (ws[addr]) ws[addr].s = Object.assign({}, ws[addr].s || {}, { font: { bold: true } });
+        }
+        // 所有单元格左对齐
+        for (let r = 0; r <= range.e.r; r++) {
+          for (let c = 0; c <= range.e.c; c++) {
+            const addr = XLSX.utils.encode_cell({ r, c });
+            if (ws[addr]) {
+              ws[addr].s = Object.assign({}, ws[addr].s || {}, { alignment: { horizontal: 'left' } });
+            }
+          }
         }
         // 数值格式为0.00（跳过num和group两列）
         for (let r = 1; r <= range.e.r; r++) {
@@ -632,12 +966,17 @@
 
       let fname = document.getElementById('xlsxFileName').value.trim();
       if (!fname) {
-        const now = new Date();
-        const ds = now.toISOString().slice(0,10);
-        const ts = now.toTimeString().slice(0,5).replace(':','-');
-        const inst2 = document.getElementById('instrument').value;
-        const instLabel2 = inst2 === 'roche' ? 'Roche' : 'BioRad';
-        fname = `PlateExport_${instLabel2}_${ds}_${ts}.xlsx`;
+        const importedName = getImportedFileName();
+        if (importedName) {
+          fname = `${importedName}_trans.xlsx`;
+        } else {
+          const now = new Date();
+          const ds = now.toISOString().slice(0,10);
+          const ts = now.toTimeString().slice(0,5).replace(':','-');
+          const inst2 = document.getElementById('instrument').value;
+          const instLabel2 = inst2 === 'roche' ? 'Roche' : 'BioRad';
+          fname = `PlateExport_${instLabel2}_${ds}_${ts}.xlsx`;
+        }
       } else if (!fname.endsWith('.xlsx')) {
         fname += '.xlsx';
       }
@@ -902,14 +1241,14 @@ self.onmessage = function(e) {
             });
           }
           if (!detected || imported === 0 || countSet === 0) {
-            alert('未识别到有效的Bio-Rad或Roche数据表头，请检查Excel文件格式。');
+            alert('No valid Bio-Rad or Roche data headers detected, please check Excel file format.');
             resolve({ detected: null, imported: 0 });
             return;
           }
           const instSel = document.getElementById('instrument');
           if (detected === 'biorad') instSel.value = 'biorad';
           else if (detected === 'roche') instSel.value = 'roche';
-          alert(`导入完成：${detected === 'biorad' ? 'Bio-Rad' : 'Roche'} 数据，共更新 ${countSet} 个孔位。`);
+          alert(`Import completed: ${detected === 'biorad' ? 'Bio-Rad' : 'Roche'} data, ${countSet} wells updated.`);
           resolve({ detected, imported: countSet });
         };
         // 将ArrayBuffer转移到Worker，避免复制
@@ -917,19 +1256,42 @@ self.onmessage = function(e) {
       });
     }
 
-    document.getElementById('importExcelBtn').addEventListener('click', async () => {
-      const input = document.getElementById('excelFile');
-      const file = input.files && input.files[0];
-      if (!file) { alert('请选择Excel文件'); return; }
+    // 文件选择后自动导入数据
+    document.getElementById('excelFile').addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      
+      // 显示加载状态
+      const fileInput = document.getElementById('excelFile');
+      fileInput.disabled = true;
+      fileInput.style.opacity = '0.7';
+      
+      // 清空当前数据
       document.querySelectorAll('#grid td').forEach(td => {
         td.classList.remove('selected','only-sample','only-gene','both-values');
         td.dataset.sampleName = ''; td.dataset.targetGene = ''; td.dataset.ct = '';
         td.title=''; td.innerHTML='';
       });
       
-      await importExcelFile(file);
-      updateSidebarInputs();
-      input.value = '';
+      try {
+        await importExcelFile(file);
+        updateSidebarInputs();
+        
+        // 导入成功后清空文件选择，允许重新选择
+        e.target.value = '';
+        
+        // 恢复文件输入状态
+        fileInput.disabled = false;
+        fileInput.style.opacity = '1';
+        
+      } catch (error) {
+        console.error('导入失败:', error);
+        alert('File import failed, please check if the file format is correct.');
+        
+        // 恢复文件输入状态
+        fileInput.disabled = false;
+        fileInput.style.opacity = '1';
+      }
     });
 
     // Init
