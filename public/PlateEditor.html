@@ -6,7 +6,6 @@
   <title>PlateEditor</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧬</text></svg>">
   <style>
-    /* 谷歌设计规范 + HyperOS9冷色系 */
     :root {
       --primary: #4285F4;
       --primary-dark: #3367D6;
@@ -373,7 +372,6 @@
       user-select: none;
     }
     
-    /* 紧凑布局优化 */
     .compact-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -387,7 +385,6 @@
       font-size: 11px;
     }
     
-    /* 状态指示器 */
     .status-indicator {
       display: inline-flex;
       align-items: center;
@@ -405,7 +402,6 @@
       animation: pulse 2s ease-in-out infinite;
     }
     
-    /* iOS风格滚动条 */
     .sidebar::-webkit-scrollbar {
       width: 8px;
     }
@@ -424,7 +420,6 @@
       background: var(--text-muted);
     }
     
-    /* 文件上传按钮样式优化 */
     input[type="file"] {
       padding: 12px 16px;
       border: 2px dashed var(--border);
@@ -484,7 +479,7 @@
 
     <div class="right">
       <div class="sidebar">
-        <h2>PlateEditor</h2>
+        <h1>📑 PlateEditor</h1>
 
         <div class="form-row">
           <label for="instrument">Instrument Type</label>
@@ -514,7 +509,7 @@
           <input type="text" id="sampleName" placeholder="Enter sample name">
         </div>
 
-        <button class="btn btn-primary btn-large" id="applyBtn">Apply to Selected Wells</button>
+        <button class="btn btn-primary btn-large" id="applyBtn">Apply</button>
 
         <div class="compact-grid">
           <button class="btn btn-gray" id="removeSelBtn">Clear Selection</button>
@@ -523,7 +518,7 @@
           <button class="btn btn-gray" id="clearValuesBtn">Clear Values</button>
         </div>
 
-        <button class="btn btn-red" id="resetAllBtn">🔄 Reset All Data</button>
+        <button class="btn btn-red" id="resetAllBtn">Reset All Data</button>
 
 
         <h2 style="margin-top:20px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">Data Export</h2>
@@ -531,7 +526,7 @@
           <label for="xlsxFileName">File Name</label>
           <input type="text" id="xlsxFileName" placeholder="Default timestamp">
         </div>
-        <button class="btn btn-green btn-large" id="exportXLSXBtn">Export Data</button>
+        <button class="btn btn-green btn-large" id="exportXLSXBtn">Export</button>
         <div style="text-align: center; margin-top: 8px; font-size: 10px; color: #80868B; font-style: normal;">
           Designed by FGH & Tecent Codebuddy
         </div>
@@ -550,14 +545,12 @@
     let startElement = null;
     let dragType = null; // 'cell','row','col'
     // Colors
-    // MIUI风格色板 - 高对比度区分
     const colorPalette = [
       '#FF3B30','#FF9500','#FFCC00','#4CD964','#5AC8FA',
       '#007AFF','#5856D6','#FF2D55','#FF3B30','#FF9500',
       '#FFCC00','#4CD964','#5AC8FA','#007AFF','#5856D6',
       '#FF2D55','#8E8E93','#C7C7CC','#D1D1D6','#E5E5EA'
     ];
-    // 颜色映射采用LRU，避免无限增长
     const MAX_COLOR_MAP = 200;
     const sampleNameColors = new Map();
     const targetGeneColors = new Map();
@@ -565,12 +558,10 @@
       const map = type === 'sample' ? sampleNameColors : targetGeneColors;
       if (!value) return '#fff';
       if (!map.has(value)) {
-        // 超限则淘汰最早插入的键
         if (map.size >= MAX_COLOR_MAP) {
           const firstKey = map.keys().next().value;
           map.delete(firstKey);
         }
-        // 使用非常浅的清淡配色
         const lightColors = [
           '#F8FBFF', '#F9F7FF', '#F7FFF7', '#FFFCF5', '#FFF5F8',
           '#F5FFFE', '#FDFFF7', '#FFFEF5', '#F7F8FF', '#F7FFF9',
