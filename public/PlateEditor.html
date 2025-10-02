@@ -958,6 +958,89 @@
       wsName2 = wsName2.slice(0, 31);
       XLSX.utils.book_append_sheet(wb, wsSummary, wsName2);
 
+      // 追加“导入样式”工作表：根据仪器类型生成当前孔板数据的导入格式
+      (function appendImportedStyleSheet() {
+        const inst = document.getElementById('instrument').value;
+        const isBioRad = inst === 'biorad';
+        // 组装数据
+        let header, rowsAoa;
+        if (isBioRad) {
+          header = ['Well', 'Target', 'Sample', 'Cq'];
+          rowsAoa = [header];
+          for (let r = 0; r < rows; r++) {
+            for (let c = 1; c <= cols; c++) {
+              const td = document.querySelector('td[data-row="' + rowLabels[r] + '"][data-col="' + c + '"]');
+              const sample = td.dataset.sampleName || '';
+              const gene = td.dataset.targetGene || '';
+              const ct = td.dataset.ct || '';
+              // 只输出有任意值的孔，避免生成纯空行
+              if (sample || gene || ct) {
+                const pos = rowLabels[r] + String(c);
+                rowsAoa.push([pos, gene, sample, ct || '']);
+              }
+            }
+          }
+        } else {
+          // Roche
+          header = ['Pos', 'Name', 'Cp'];
+          rowsAoa = [header];
+          for (let r = 0; r < rows; r++) {
+            for (let c = 1; c <= cols; c++) {
+              const td = document.querySelector('td[data-row="' + rowLabels[r] + '"][data-col="' + c + '"]');
+              const sample = td.dataset.sampleName || '';
+              const ct = td.dataset.ct || '';
+              const gene = td.dataset.targetGene || ''; // Roche导入通常不含Target列，这里不导出
+              if (sample || gene || ct) {
+                const pos = rowLabels[r] + String(c);
+                rowsAoa.push([pos, sample, ct || '']);
+              }
+            }
+          }
+        }
+        // 生成工作表
+        const wsImported = XLSX.utils.aoa_to_sheet(rowsAoa);
+        // 列宽
+        if (isBioRad) {
+          wsImported['!cols'] = [{ wch: 6 }, { wch: 14 }, { wch: 18 }, { wch: 8 }];
+        } else {
+          wsImported['!cols'] = [{ wch: 6 }, { wch: 18 }, { wch: 8 }];
+        }
+        // 简单样式：表头加粗、左对齐、数值列按需格式
+        const refImp = wsImported['!ref'];
+        if (refImp) {
+          const range = XLSX.utils.decode_range(refImp);
+          for (let c = 0; c <= range.e.c; c++) {
+            const addr = XLSX.utils.encode_cell({ r: 0, c });
+            if (wsImported[addr]) wsImported[addr].s = Object.assign({}, wsImported[addr].s || {}, { font: { bold: true } });
+          }
+          for (let r = 0; r <= range.e.r; r++) {
+            for (let c = 0; c <= range.e.c; c++) {
+              const addr = XLSX.utils.encode_cell({ r, c });
+              if (wsImported[addr]) {
+                wsImported[addr].s = Object.assign({}, wsImported[addr].s || {}, { alignment: { horizontal: 'left' } });
+              }
+            }
+          }
+          // 将 Cq/Cp 列尝试设为数字并应用 0.00（跳过表头）
+          const ctColIndex = isBioRad ? 3 : 2;
+          for (let r = 1; r <= range.e.r; r++) {
+            const addr = XLSX.utils.encode_cell({ r, c: ctColIndex });
+            const cell = wsImported[addr];
+            if (!cell) continue;
+            const num = typeof cell.v === 'number' ? cell.v : parseFloat(String(cell.v));
+            if (Number.isFinite(num)) {
+              cell.v = num;
+              cell.t = 'n';
+              cell.z = '0.00';
+            }
+          }
+        }
+        const instLabel = isBioRad ? 'BioRad' : 'Roche';
+        let wsName3 = 'ImportedStyle_' + instLabel;
+        wsName3 = wsName3.slice(0, 31);
+        XLSX.utils.book_append_sheet(wb, wsImported, wsName3);
+      })();
+
       let fname = document.getElementById('xlsxFileName').value.trim();
       if (!fname) {
         const importedName = getImportedFileName();
@@ -982,13 +1065,30 @@
 
     // 导出孔板视图为PNG
     function downloadPlateScreenshot(baseName) {
-      const node = document.getElementById('stageWrap');
       const inst = document.getElementById('instrument').value;
       const instLabel = inst === 'roche' ? 'Roche' : 'BioRad';
       const pngName = baseName && baseName.endsWith('.xlsx')
         ? baseName.replace('.xlsx', `_${instLabel}_plate.png`)
         : `PlateExport_${instLabel}_plate.png`;
-      html2canvas(node, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
+
+      // 离屏克隆：去除缩放和平移，确保完整覆盖 384 孔板
+      const stageNode = document.getElementById('stage');
+      const cloneStage = stageNode.cloneNode(true);
+      // 去掉绝对定位与变换，使其以自然尺寸渲染
+      cloneStage.style.position = 'static';
+      cloneStage.style.transform = 'none';
+
+      // 离屏容器，避免影响当前视图
+      const tempWrap = document.createElement('div');
+      tempWrap.style.position = 'fixed';
+      tempWrap.style.left = '-10000px';
+      tempWrap.style.top = '-10000px';
+      tempWrap.style.background = '#ffffff';
+      tempWrap.style.padding = '0'; // 保持原始尺寸
+      tempWrap.appendChild(cloneStage);
+      document.body.appendChild(tempWrap);
+
+      html2canvas(cloneStage, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
         canvas.toBlob(blob => {
           const a = document.createElement('a');
           const url = URL.createObjectURL(blob);
@@ -996,6 +1096,21 @@
           a.download = pngName;
           a.click();
           URL.revokeObjectURL(url);
+          // 清理临时节点
+          document.body.removeChild(tempWrap);
+        });
+      }).catch(() => {
+        // 回退方案：若克隆渲染失败则使用原视口截图
+        const node = document.getElementById('stageWrap');
+        html2canvas(node, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
+          canvas.toBlob(blob => {
+            const a = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            a.href = url;
+            a.download = pngName;
+            a.click();
+            URL.revokeObjectURL(url);
+          });
         });
       });
     }
