@@ -1097,6 +1097,26 @@
 
     document.getElementById('exportXLSXBtn').addEventListener('click', generateXLSX);
 
+    // Enter 键触发 Apply（仅在无修饰键且存在选中单元格时）
+    function handleEnterApply(e) {
+      if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        const selected = document.querySelectorAll('#grid td.selected');
+        if (selected.length > 0) {
+          e.preventDefault();
+          applyValues();
+        }
+      }
+    }
+    // 在两个输入框里按 Enter 触发
+    document.getElementById('sampleName').addEventListener('keydown', handleEnterApply);
+    document.getElementById('targetGene').addEventListener('keydown', handleEnterApply);
+    // 在侧栏其它区域按 Enter 也可触发（避免在文件输入或按钮上触发）
+    document.querySelector('.sidebar').addEventListener('keydown', (e) => {
+      const tag = e.target.tagName.toLowerCase();
+      if (tag === 'input' || tag === 'select' || tag === 'textarea') return; // 已由专用监听处理
+      handleEnterApply(e);
+    });
+
     // Excel 导入
     // Web Worker：在后台解析Excel，主线程仅负责渲染与UI
     let excelWorker = null;
