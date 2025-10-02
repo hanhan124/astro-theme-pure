@@ -976,7 +976,7 @@
               // 只输出有任意值的孔，避免生成纯空行
               if (sample || gene || ct) {
                 const pos = rowLabels[r] + String(c);
-                rowsAoa.push([pos, gene, sample, ct || '']);
+                rowsAoa.push([pos, (gene || 'NA'), (sample || 'NA'), ct || '']);
               }
             }
           }
@@ -1283,7 +1283,7 @@ self.onmessage = function(e) {
         const target = getVal(row, ['Target']);
         const sample = getVal(row, ['Sample']);
         const cq = getVal(row, ['Cq']);
-        results.push({ pos: well, sample, gene: target, ct: cq });
+        results.push({ pos: well, sample: (sample || 'NA'), gene: (target || 'NA'), ct: cq });
         imported++;
       }
       continue;
