@@ -19,17 +19,17 @@
       --text-primary: #3C4043;
       --text-secondary: #5F6368;
       --text-muted: #80868B;
-      --shadow-sm: 0 1px 2px rgba(60,64,67,0.3);
-      --shadow-md: 0 2px 6px rgba(60,64,67,0.15);
-      --shadow-lg: 0 4px 12px rgba(60,64,67,0.15);
-      --radius-sm: 4px;
-      --radius-md: 8px;
-      --radius-lg: 12px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.20);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.18);
+      --shadow-lg: 0 12px 30px rgba(0,0,0,0.22);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
       --blur-bg: rgba(255,255,255,0.95);
     }
     
     body { 
-      font-family: 'Roboto', 'Noto Sans SC', 'Microsoft YaHei', sans-serif; 
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Roboto', 'Noto Sans SC', 'Microsoft YaHei', sans-serif; 
       background: linear-gradient(135deg, #F1F3F4 0%, #E8EAED 100%); 
       margin: 0; 
       color: var(--text-primary);
@@ -72,6 +72,7 @@
       left: 0; 
       top: 0; 
       transform-origin: 0 0; 
+      will-change: transform;
     }
     
     .grid-container { 
@@ -83,7 +84,7 @@
       border-collapse: separate; 
       border-spacing: 1px;
       background: var(--surface); 
-      box-shadow: var(--shadow-md);
+      box-shadow: none;
       border-radius: var(--radius-md);
       overflow: hidden;
       border: 1px solid var(--border);
@@ -97,7 +98,7 @@
       vertical-align: middle; 
       font-size: 11px; 
       line-height: 1.2; 
-      transition: all 0.15s ease;
+      transition: none;
       background: var(--surface);
     }
     
@@ -116,8 +117,6 @@
     
     #grid th:hover {
       background: linear-gradient(135deg, #E8F0FE 0%, #D2E3FC 100%);
-      transform: translateY(-1px);
-      box-shadow: 0 1px 4px rgba(26,115,232,0.2);
     }
     
     #grid td { 
@@ -128,9 +127,6 @@
     
     #grid td:hover {
       background: #F8F9FA;
-      transform: scale(1.02);
-      z-index: 2;
-      box-shadow: 0 2px 8px rgba(26,115,232,0.15);
       border-color: var(--primary);
     }
     
@@ -153,7 +149,6 @@
       bottom: -1px;
       border: 2px solid var(--primary);
       border-radius: 2px;
-      animation: pulse 1.5s ease-in-out infinite;
     }
     
     @keyframes pulse {
@@ -183,6 +178,12 @@
       font-weight: 500;
       border: 1px solid #A5D6A7;
       box-shadow: inset 0 1px 2px rgba(255,255,255,0.8);
+    }
+    /* CT missing highlight (empty or NA) */
+    #grid td.ct-missing {
+      outline: 2px solid var(--danger);
+      outline-offset: -1px;
+      box-shadow: 0 0 0 1px var(--danger) inset;
     }
     
     .value-text { 
@@ -225,13 +226,13 @@
     }
     
     .sidebar { 
-      padding: 16px; 
+      padding: 12px; 
       overflow-y: auto;  /* 添加垂直滚动 */
       overflow-x: hidden; /* 防止水平滚动 */
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 8px;
       max-height: calc(100vh - 32px);
       box-sizing: border-box;
     }
@@ -256,7 +257,7 @@
     
     .form-row { 
       margin-bottom: 0; 
-      padding: 6px 0;
+      padding: 4px 0;
       border-bottom: 1px solid var(--surface-alt);
     }
     
@@ -264,7 +265,7 @@
       display: block; 
       font-size: 11px; 
       color: var(--text-secondary);
-      margin-bottom: 6px; 
+      margin-bottom: 4px; 
       font-weight: 500;
       letter-spacing: 0.2px;
     }
@@ -273,7 +274,7 @@
       width: 100%; 
       padding: 8px 12px; 
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm); 
+      border-radius: var(--radius-md); 
       font-size: 13px; 
       background: var(--surface); 
       transition: all 0.15s ease;
@@ -299,9 +300,9 @@
       font-weight: 600; 
       color: #ffffff;
       border: none; 
-      border-radius: var(--radius-sm); 
+      border-radius: var(--radius-md); 
       cursor: pointer; 
-      margin-bottom: 6px; 
+      margin-bottom: 4px; 
       transition: all 0.15s ease;
       position: relative;
       /* 避免按钮内部内容被裁切 */
@@ -313,7 +314,7 @@
       padding: 14px 16px; 
       font-size: 15px; 
       font-weight: 700;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     
     .btn::before {
@@ -402,7 +403,7 @@
       border-radius: 50%;
       background: var(--success);
       box-shadow: 0 0 0 1px var(--success);
-      animation: pulse 2s ease-in-out infinite;
+      animation: none;
     }
     
     .sidebar::-webkit-scrollbar {
@@ -453,6 +454,20 @@
       background: var(--primary-dark);
       transform: translateY(-1px);
     }
+
+    .sidebar h1 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.1;
+      padding: 4px 0;
+      letter-spacing: 0.2px;
+      text-align: center;
+    }
+    /* Larger inputs for Target Gene and Sample Name */
+    #targetGene, #sampleName {
+      font-size: 15px;
+      padding: 10px 14px;
+    }
   </style>
   <!-- SheetJS for xlsx export -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -492,7 +507,21 @@
           </select>
         </div>
 
-        <h2 style="margin-top:20px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">Data Import</h2>
+        <div class="form-row">
+          <label for="plateType">Plate Type</label>
+          <select id="plateType">
+            <option value="384" selected>384-well</option>
+            <option value="96">96-well</option>
+          </select>
+        </div>
+
+
+
+
+
+
+
+        <h2 style="margin-top:8px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">Data Import</h2>
         <div class="form-row">
           <label for="excelFile">Select Excel File (Auto Import)</label>
           <input type="file" id="excelFile" accept=".xlsx,.xls">
@@ -538,10 +567,24 @@
   </div>
 
   <script>
-    const rows = 16;
-    const cols = 24;
-    const rowLabels = Array.from({length: rows}, (_, i) => String.fromCharCode(65 + i)); // A..P
+    let rows = 16;
+    let cols = 24;
+    let plateType = '384';
+    let rowLabels = Array.from({length: rows}, (_, i) => String.fromCharCode(65 + i)); // A..P
     const grid = document.getElementById('grid');
+
+    function setPlateType(type) {
+      plateType = type;
+      if (type === '96') { rows = 8; cols = 12; } else { rows = 16; cols = 24; }
+      rowLabels = Array.from({length: rows}, (_, i) => String.fromCharCode(65 + i));
+      createGrid();
+      document.querySelectorAll('#grid td').forEach(td => {
+        td.dataset.sampleName=''; td.dataset.targetGene=''; td.dataset.ct='';
+        updateCellAppearance(td);
+      });
+      centerPlate();
+      updateSidebarInputs();
+    }
 
     // Selection state
     let isDragging = false;
@@ -617,6 +660,8 @@
       cell.innerHTML = html;
       const inst = document.getElementById('instrument').value;
       const ctLabel = inst === 'roche' ? 'Cp' : 'Cq';
+      const isMissingCt = !ct || String(ct).trim()==='' || String(ct).toUpperCase()==='NA';
+      cell.classList.toggle('ct-missing', isMissingCt);
       cell.title = `Pos ${cell.dataset.row}${cell.dataset.col} | Sample: ${sample || 'None'} | Gene: ${gene || 'None'} | ${ctLabel}: ${ct || 'NA'}`;
     }
 
@@ -663,6 +708,8 @@
     
     window.dragSelect = function(el) {
       if (!isDragging) return;
+      // 移动孔板（平移或按住空格）时不执行框选
+      if (panning || spacePressed) return;
       
       clearSelections();
       
@@ -965,7 +1012,7 @@
         // 组装数据
         let header, rowsAoa;
         if (isBioRad) {
-          header = ['Well', 'Target', 'Sample', 'Cq'];
+          header = ['Well','Fluor','Target','Content','Sample','Cq','Starting Quantity (SQ)'];
           rowsAoa = [header];
           for (let r = 0; r < rows; r++) {
             for (let c = 1; c <= cols; c++) {
@@ -975,8 +1022,8 @@
               const ct = td.dataset.ct || '';
               // 只输出有任意值的孔，避免生成纯空行
               if (sample || gene || ct) {
-                const pos = rowLabels[r] + String(c);
-                rowsAoa.push([pos, (gene || 'NA'), (sample || 'NA'), ct || '']);
+                const pos = rowLabels[r] + String(c).padStart(2,'0');
+                rowsAoa.push([pos, 'SYBR', (gene || 'NA'), 'Unkn', (sample || 'NA'), (ct || ''), '']);
               }
             }
           }
@@ -991,7 +1038,7 @@
               const ct = td.dataset.ct || '';
               const gene = td.dataset.targetGene || ''; // Roche导入通常不含Target列，这里不导出
               if (sample || gene || ct) {
-                const pos = rowLabels[r] + String(c);
+                const pos = rowLabels[r] + String(c).padStart(2,'0');
                 rowsAoa.push([pos, sample, ct || '']);
               }
             }
@@ -1022,7 +1069,7 @@
             }
           }
           // 将 Cq/Cp 列尝试设为数字并应用 0.00（跳过表头）
-          const ctColIndex = isBioRad ? 3 : 2;
+          const ctColIndex = isBioRad ? 5 : 2;
           for (let r = 1; r <= range.e.r; r++) {
             const addr = XLSX.utils.encode_cell({ r, c: ctColIndex });
             const cell = wsImported[addr];
@@ -1089,6 +1136,16 @@
       document.body.appendChild(tempWrap);
 
       html2canvas(cloneStage, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
+        // Title watermark (from xlsxFileName or default)
+        try {
+          const ctx = canvas.getContext('2d');
+          const instLabel2 = instLabel;
+          const rawTitle = (document.getElementById('xlsxFileName')?.value || '').trim();
+          const title = rawTitle ? rawTitle.replace(/\.[^/.]+$/, '') : `PlateExport_${instLabel2}`;
+          ctx.fillStyle = 'rgba(0,0,0,0.6)';
+          ctx.font = '20px sans-serif';
+          ctx.fillText(title, 12, 28);
+        } catch {}
         canvas.toBlob(blob => {
           const a = document.createElement('a');
           const url = URL.createObjectURL(blob);
@@ -1103,6 +1160,16 @@
         // 回退方案：若克隆渲染失败则使用原视口截图
         const node = document.getElementById('stageWrap');
         html2canvas(node, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
+          // Title watermark (fallback path)
+          try {
+            const ctx = canvas.getContext('2d');
+            const instLabel2 = instLabel;
+            const rawTitle = (document.getElementById('xlsxFileName')?.value || '').trim();
+            const title = rawTitle ? rawTitle.replace(/\.[^/.]+$/, '') : `PlateExport_${instLabel2}`;
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.font = '20px sans-serif';
+            ctx.fillText(title, 12, 28);
+          } catch {}
           canvas.toBlob(blob => {
             const a = document.createElement('a');
             const url = URL.createObjectURL(blob);
@@ -1125,6 +1192,7 @@
     let panning = false;
     let panStart = {x:0,y:0};
     let viewStart = {x:0,y:0};
+    let rafPending = false;
 
     // 居中网格显示
     function centerPlate() {
@@ -1141,7 +1209,7 @@
     }
 
     function applyTransform() {
-      stage.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+      stage.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
       viewStatus.textContent = `scale:${scale.toFixed(2)}, x:${Math.round(tx)}, y:${Math.round(ty)}`;
     }
 
@@ -1177,7 +1245,10 @@
       const dy = e.clientY - panStart.y;
       tx = viewStart.x + dx;
       ty = viewStart.y + dy;
-      applyTransform();
+      if (!rafPending) {
+        rafPending = true;
+        requestAnimationFrame(() => { applyTransform(); rafPending = false; });
+      }
     });
     window.addEventListener('mouseup', () => { panning = false; });
     let spacePressed = false;
@@ -1211,6 +1282,8 @@
     document.getElementById('resetAllBtn').addEventListener('click', resetAll);
 
     document.getElementById('exportXLSXBtn').addEventListener('click', generateXLSX);
+    // 板型切换 / 语言 / 深色模式
+    document.getElementById('plateType').addEventListener('change', (e) => setPlateType(e.target.value));
 
     // Enter 键触发 Apply（仅在无修饰键且存在选中单元格时）
     function handleEnterApply(e) {
@@ -1425,6 +1498,8 @@ self.onmessage = function(e) {
 
     // Init
     createGrid();
+    // 默认板型/语言
+    setPlateType('384');
     // Initialize cell dataset
     document.querySelectorAll('#grid td').forEach(td => { td.dataset.sampleName=''; td.dataset.targetGene=''; td.dataset.ct=''; });
     // 初始居中
