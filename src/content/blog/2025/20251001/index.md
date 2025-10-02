@@ -59,11 +59,11 @@ language: 中文
 
 1. 打开导出的 Excel 数据文件
 2. 将内参基因（如 _TBP_, _GAPDH_, _ACTB_）所在列移动至所有目标基因前列
-3. 复制以下关键列数据到 [QPCR_input.xlsm]([QPCR_input.xlsm](https://github.com/hanhan124/blog_bed/blob/main/QPCR_input.xlsm)) 中，随后点击按钮即可分析并生成结果
+3. 复制以下关键列数据到 [QPCR_input.xlsm](https://drive.google.com/file/d/1TFrTUJeWYqO1SGmBs2PSz8A6WHjmS6Bx/view?usp=sharing) 中，随后点击按钮即可分析并生成结果
     - Sample Name（样本名称）
     - Target Gene（目标基因）
-    - CT 值（通常为 "Cq" 或 "Cycle Threshold" 列）
-4. 使用前请确保仅打开此一个 Excel 工作簿（避免宏运行冲突）；5. 文件为 `.xlsm` 格式，启用宏后方可执行分析
+    - CT 值
+4. 使用前请确保仅打开此一个 Excel 工作簿（避免宏运行冲突）；文件为 `.xlsm` 格式，启用宏后方可执行分析
 5. 程序将自动执行：
     - ΔΔCt 计算
     - 相对表达量（2^(-ΔΔCt)）转换
