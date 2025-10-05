@@ -550,6 +550,11 @@
           <button class="btn btn-gray" id="clearValuesBtn">Clear Values</button>
         </div>
 
+        <button class="btn btn-primary btn-large" id="setTemplateBtn" title="Save current well gene names as template">Set as Template</button>
+        <div class="compact-grid">
+          <button class="btn btn-orange" id="applyTemplateBtn" title="Apply saved template to fill gene names">Apply Template</button>
+          <button class="btn btn-red" id="clearTemplateBtn" title="Clear saved template for current plate type">Clear Template</button>
+        </div>
         <button class="btn btn-red" id="resetAllBtn">Reset All Data</button>
 
 
@@ -810,6 +815,137 @@
         all.forEach(td => { td.title=''; td.innerHTML=''; updateCellAppearance(td); });
         updateSidebarInputs();
       });
+    }
+
+    // ==== Template (96/384) ====
+    const TEMPLATE_KEYS = { '96': 'plateTemplate_96', '384': 'plateTemplate_384' };
+
+    function getWellList() {
+      // 使用当前行列与行标签生成标准孔位：A1..H12 或 A1..P24
+      const list = [];
+      for (let r = 0; r < rows; r++) {
+        const row = rowLabels[r];
+        for (let c = 1; c <= cols; c++) {
+          list.push(row + c);
+        }
+      }
+      return list;
+    }
+
+    function collectGeneMapFromEditor() {
+      // 收集当前孔板的孔位 -> 基因名映射，仅保存 gene
+      const map = {};
+      for (let r = 0; r < rows; r++) {
+        const row = rowLabels[r];
+        for (let c = 1; c <= cols; c++) {
+          const td = document.querySelector(`td[data-row="${row}"][data-col="${c}"]`);
+          const gene = td?.dataset?.targetGene || '';
+          map[row + c] = gene;
+        }
+      }
+      return map;
+    }
+
+    function saveTemplate(type, map) {
+      try {
+        localStorage.setItem(TEMPLATE_KEYS[type], JSON.stringify(map));
+      } catch {}
+    }
+
+    function loadTemplate(type) {
+      try {
+        const raw = localStorage.getItem(TEMPLATE_KEYS[type]);
+        return raw ? JSON.parse(raw) : null;
+      } catch { return null; }
+    }
+
+    function clearTemplate(type) {
+      try { localStorage.removeItem(TEMPLATE_KEYS[type]); } catch {}
+    }
+
+    function hasTemplate(type) {
+      return !!loadTemplate(type);
+    }
+
+    function refreshTemplateUI() {
+      const setBtn = document.getElementById('setTemplateBtn');
+      const applyBtn = document.getElementById('applyTemplateBtn');
+      const clrBtn = document.getElementById('clearTemplateBtn');
+      if (!setBtn || !applyBtn || !clrBtn) return;
+
+      const has = hasTemplate(plateType);
+
+      // Set 按钮：已设模板高亮，未设为灰色（仍可点击覆盖）
+      setBtn.classList.toggle('btn-primary', has);
+      setBtn.classList.toggle('btn-gray', !has);
+      setBtn.title = has ? `Template exists for ${plateType}-well plate` : `Save template for ${plateType}-well plate`;
+
+      // Apply 按钮：无模板置灰禁用
+      applyBtn.disabled = !has;
+      applyBtn.classList.toggle('btn-orange', has);
+      applyBtn.classList.toggle('btn-gray', !has);
+      applyBtn.title = has ? `Apply template to current ${plateType}-well plate` : `No template set for ${plateType}-well plate`;
+
+      // Clear 按钮：无模板置灰禁用
+      clrBtn.disabled = !has;
+      clrBtn.classList.toggle('btn-red', has);
+      clrBtn.classList.toggle('btn-gray', !has);
+      clrBtn.title = has ? `Clear template for ${plateType}-well plate` : `No template set for ${plateType}-well plate`;
+    }
+
+    function setTemplate() {
+      const geneMap = collectGeneMapFromEditor();
+      // 简单校验：至少存在任意非空基因名
+      const hasAny = Object.values(geneMap).some(v => !!(v && String(v).trim() !== ''));
+      if (!hasAny) {
+        alert(`No gene names found to save as template for ${plateType}-well plate.`);
+        return;
+      }
+      saveTemplate(plateType, geneMap);
+      refreshTemplateUI();
+      alert(`Template saved for ${plateType}-well plate.`);
+    }
+
+    function applyTemplate() {
+      const tpl = loadTemplate(plateType);
+      if (!tpl) {
+        alert(`No template set for ${plateType}-well plate.`);
+        refreshTemplateUI();
+        return;
+      }
+      const wells = getWellList();
+      let filled = 0, missing = 0;
+      for (const pos of wells) {
+        const row = pos[0];
+        const col = parseInt(pos.slice(1), 10);
+        const td = document.querySelector(`td[data-row="${row}"][data-col="${col}"]`);
+        if (!td) continue;
+        const gene = tpl[pos];
+        if (gene !== undefined) {
+          td.dataset.targetGene = gene || '';
+          updateCellAppearance(td);
+          filled++;
+        } else {
+          missing++;
+        }
+      }
+      updateSidebarInputs();
+      if (missing > 0) {
+        alert(`Applied partial template: ${filled} wells filled, ${missing} wells missing.`);
+      } else {
+        alert(`Template applied to current ${plateType}-well plate.`);
+      }
+    }
+
+    function clearTemplateAction() {
+      if (!hasTemplate(plateType)) {
+        alert(`No template set for ${plateType}-well plate.`);
+        refreshTemplateUI();
+        return;
+      }
+      clearTemplate(plateType);
+      refreshTemplateUI();
+      alert(`Template cleared for ${plateType}-well plate.`);
     }
 
 
@@ -1281,9 +1417,17 @@
     document.getElementById('clearValuesBtn').addEventListener('click', clearSelectedValues);
     document.getElementById('resetAllBtn').addEventListener('click', resetAll);
 
+    // Template buttons
+    document.getElementById('setTemplateBtn').addEventListener('click', setTemplate);
+    document.getElementById('applyTemplateBtn').addEventListener('click', applyTemplate);
+    document.getElementById('clearTemplateBtn').addEventListener('click', clearTemplateAction);
+
     document.getElementById('exportXLSXBtn').addEventListener('click', generateXLSX);
     // 板型切换 / 语言 / 深色模式
-    document.getElementById('plateType').addEventListener('change', (e) => setPlateType(e.target.value));
+    document.getElementById('plateType').addEventListener('change', (e) => {
+      setPlateType(e.target.value);
+      refreshTemplateUI();
+    });
 
     // Enter 键触发 Apply（仅在无修饰键且存在选中单元格时）
     function handleEnterApply(e) {
@@ -1504,6 +1648,8 @@ self.onmessage = function(e) {
     document.querySelectorAll('#grid td').forEach(td => { td.dataset.sampleName=''; td.dataset.targetGene=''; td.dataset.ct=''; });
     // 初始居中
     centerPlate();
+    // 初始刷新模板按钮状态
+    refreshTemplateUI();
     // 窗口尺寸变化时保持居中
     window.addEventListener('resize', () => { centerPlate(); });
   </script>
