@@ -16,13 +16,13 @@ language: 中文
 
 ## 二、系统组成与分子原理
 
-### 🔹 1. Lgr5-CreER：空间特异性 + 时间可控性
+### 1. Lgr5-CreER：空间特异性 + 时间可控性
 
 - **Lgr5** 是 Wnt 信号通路的靶基因，仅在隐窝底部的活跃干细胞中表达。
 - **CreER** 是 Cre 酶与改造雌激素受体（ER）融合的蛋白，需 Tamoxifen 激活。
 - 激活后进入细胞核，剪除 LoxP 位点间的 STOP 序列。
 
-📌 **机制图示：**
+**机制图示：**
 
 ```mermaid
 graph TD
@@ -33,9 +33,9 @@ graph TD
 
 ---
 
-### 🔹 2. Rosa26-loxP-STOP-loxP-Reporter：安全插入 + 永久标记
+### 2. Rosa26-loxP-STOP-loxP-Reporter：安全插入 + 永久标记
 
-#### ✅ Rosa26 原理详解：
+#### Rosa26 原理详解：
 
 - 位于小鼠第6号染色体，是一个**非编码但转录活跃的区域**。
 - 插入点通常选在 **intron 1**，不会干扰原始基因功能。
@@ -48,7 +48,7 @@ Rosa26 Exon1 ── Intron1 ── [loxP–STOP–loxP–LacZ] ── Exon2
 - **STOP cassette**：含多个 polyA 信号和终止密码子，阻止下游 reporter 表达。
 - **Cre 激活后**：STOP 被剪除，LacZ 开始表达，且在所有后代中持续存在。
 
-📌 **插入结构图示：**
+**插入结构图示：**
 
 ```mermaid
 graph LR
@@ -58,7 +58,7 @@ graph LR
 
 ---
 
-### 🔹 3. Tamoxifen：诱导剂
+### 3. Tamoxifen：诱导剂
 
 - 激活 CreER，使其进入细胞核。
 - 剪除 STOP 序列，启动 reporter 表达。
@@ -75,7 +75,7 @@ graph LR
 |③|CreER 剪除 STOP → LacZ 表达启动|
 |④|所有被标记的干细胞及其后代可通过 X-gal 染色呈蓝色|
 
-📌 **流程图示：**
+**流程图示：**
 
 ```mermaid
 sequenceDiagram
@@ -101,7 +101,7 @@ sequenceDiagram
 
 ## 五、系统优势与应用拓展
 
-### ✅ 应用方向：
+### 应用方向：
 
 - **干细胞功能验证**：是否能分化为所有肠道细胞类型（多能性）
 - **再生能力研究**：损伤后是否能恢复干细胞功能
@@ -110,7 +110,7 @@ sequenceDiagram
 - **多色谱系追踪**：Rosa-Confetti 小鼠标记不同干细胞谱系
 - **可塑性研究**：Alpi⁺ 分化细胞可回归 Lgr5⁺ 干细胞状态
 
-📌 **类器官图示：**
+**类器官图示：**
 
 ```mermaid
 graph TD
@@ -128,7 +128,7 @@ graph TD
 - 每个干细胞随机表达一种颜色
 - 可观察干细胞之间的空间竞争与替代
 
-📌 **竞争示意图：**
+**竞争示意图：**
 
 ```mermaid
 pie
