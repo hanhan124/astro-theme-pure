@@ -9,6 +9,7 @@ import FriendList from '@/components/links/FriendList.astro'
 const headings = [
   { depth: 2, slug: 'common-links', text: 'Common Links' },
   { depth: 2, slug: 'special-links', text: 'Special Links' },
+  { depth: 2, slug: 'book-lists', text: 'Equipment Booking List' }, 
   { depth: 2, slug: 'apply-links', text: 'Apply Links' }
 ]
 
@@ -29,6 +30,10 @@ const linkEditPage = 'https://github.com/cworld1/astro-theme-pure/blob/main/publ
   </Collapse>
   <h2 id='special-links'>Special Links</h2>
   <FriendList list={friends[2]} />
+  <h2 id='special-links'>Equipment Booking List</h2>
+  <FriendList list={friends[3]} />  
+
+
 
   <!-- apply-links -->
   <h2 id='apply-links'>Apply Links</h2>

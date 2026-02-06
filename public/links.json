@@ -40,6 +40,24 @@
           "avatar": "https://www.travellings.cn/assets/travelling.png"
         }
       ]
+    },
+    {
+      "id_name": "equipment-booking",
+      "desc": "Equipment booking list",
+      "link_list": [
+        {
+          "name": "Cytoflex",
+          "intro": "E12-2008",
+          "link": "https://ec-book.fhs.um.edu.mo/eqinfo?xeqid=5805",
+          "avatar": "/images/Cytoflex.png"
+        },
+        {
+          "name": "Cytoflex",
+          "intro": "N22-2008",
+          "link": "https://ec-book.fhs.um.edu.mo/eqinfo?xeqid=5805",
+          "avatar": "/images/Cytoflex.png"
+        }
+      ]
     }
   ]
 }
