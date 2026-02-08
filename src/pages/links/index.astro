@@ -19,7 +19,11 @@ const linkEditPage = 'https://github.com/cworld1/astro-theme-pure/blob/main/publ
 ---
 
 <PageLayout title='Links' {headings} comment>
-  <p>怎么可能有顺序呢，当然是随机的~ It's random</p>
+  <p>这里是一些可能有用的链接 ~</p>
+  <h2 id='special-links'>Equipment Booking Links</h2>
+  <FriendList list={friends[3]} />  
+  <h2 id='special-links'>Special Links</h2>
+  <FriendList list={friends[2]} />
   <h2 id='common-links'>Common Links</h2>
   <FriendList list={friends[0]} />
   <Collapse title='Links with Bad Status'>
@@ -28,12 +32,6 @@ const linkEditPage = 'https://github.com/cworld1/astro-theme-pure/blob/main/publ
   <Collapse title='Link History Book'>
     <Timeline events={linksConf.logbook} />
   </Collapse>
-  <h2 id='special-links'>Equipment Booking Links</h2>
-  <FriendList list={friends[3]} />  
-  <h2 id='special-links'>Special Links</h2>
-  <FriendList list={friends[2]} />
-
-
 
 
   <!-- apply-links -->
