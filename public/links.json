@@ -43,17 +43,29 @@
     },
     {
       "id_name": "equipment-booking",
-      "desc": "Equipment booking list",
+      "desc": "Equipment booking Links",
       "link_list": [
         {
-          "name": "Cytoflex",
-          "intro": "E12-2008",
+          "name": "Cytoflex - N22",
+          "intro": "N22-2008",
           "link": "https://ec-book.fhs.um.edu.mo/eqinfo?xeqid=5805",
           "avatar": "/images/Cytoflex.png"
         },
         {
-          "name": "Cytoflex",
+          "name": "CFX Opus 384 Dx System",
           "intro": "N22-2008",
+          "link": "https://ec-book.fhs.um.edu.mo/eqinfo/?xeqid=8045",
+          "avatar": "/images/qpcr_machine.png"
+        },
+        {
+          "name": "Invitrogen EVOS",
+          "intro": "N22-2010",
+          "link": "https://ec-book.fhs.um.edu.mo/eqinfo/?xeqid=3244",
+          "avatar": "/images/microscope-cartoon.png"
+        },
+        {
+          "name": "Cytoflex - E12",
+          "intro": "E12-30",
           "link": "https://ec-book.fhs.um.edu.mo/eqinfo?xeqid=5805",
           "avatar": "/images/Cytoflex.png"
         }
