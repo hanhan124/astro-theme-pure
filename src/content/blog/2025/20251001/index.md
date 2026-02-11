@@ -59,7 +59,7 @@ language: 中文
 
 1. 打开导出的 Excel 数据文件
 2. 将内参基因（如 _TBP_, _GAPDH_, _ACTB_）所在列移动至所有目标基因前列
-3. 复制以下关键列数据到 [QPCR_input.xlsm](https://drive.google.com/file/d/1TFrTUJeWYqO1SGmBs2PSz8A6WHjmS6Bx/view?usp=sharing) 中，随后点击按钮即可分析并生成结果
+3. 复制以下关键列数据到 [2.QPCR_template.xlsm](https://drive.google.com/file/d/1uZGhomKPx6PkbKdGF5giBWpQbTkkz4UM/view?usp=drive_link) 中，随后点击按钮即可分析并生成结果
     - Sample Name（样本名称）
     - Target Gene（目标基因）
     - CT 值
