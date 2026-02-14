@@ -1,15 +1,18 @@
 ---
 title: qPCR数据处理指北
 publishDate: 2025-10-01 08:00:00
-description: PlateEditor 与定制化 Excel 模板的 qPCR 数据标准化处理流程
+description: PlateEditor 与 qPCR 数据标准化处理流程
 tags:
   - qPCR
   - 数据处理
   - PlateEditor
   - 工具
+heroImage:
+  src: ./nova-PCRPlates.jpg
+  color: "#64574D"
 language: 中文
 ---
-提供一套完整的 qPCR 数据处理流程，涵盖原始数据的孔板编辑、信息整理，以及利用 Excel 实现自动化分析与结果可视化。
+qPCR 数据处理流程，涵盖原始数据的孔板编辑、信息整理，以及利用 Excel 实现自动化分析与结果可视化。
 
 ## 一、孔板数据编辑与格式转换
 
