@@ -2,12 +2,10 @@
 import { Button, Card, Collapse, Spoiler } from 'astro-pure/user'
 import PageLayout from '@/layouts/CommonPage.astro'
 import Substats from '@/components/about/Substats.astro'
-import ToolSection from '@/components/about/ToolSection.astro'
 
 const headings = [
   { depth: 2, slug: 'education', text: 'Education' },
   { depth: 2, slug: 'hobbies', text: 'Hobbies' },
-  { depth: 2, slug: 'tools', text: 'Tools' },
   { depth: 2, slug: 'social-networks', text: 'Social Networks' },
   { depth: 2, slug: 'gossips', text: 'Gossips' },
   { depth: 2, slug: 'about-blog', text: 'About Blog' }
@@ -67,156 +65,6 @@ const headings = [
     <li>Ex dicat impedit mel, at eum oratio possit voluptatum.</li>
     <li>Impetus fuisset ullamcorper pri cu, his posse iisque ad, aliquam honestatis usu id.</li>
   </ul>
-
-  {/* tools */}
-  <h2 id='tools'>Tools</h2>
-  <p>Current support tools as follow:</p>
-  <ToolSection
-    class='mb-5'
-    title='Design'
-    tools={[
-      {
-        name: 'Iconscout',
-        description: 'Find Free Icons',
-        href: 'https://iconscout.com/',
-        icon: import('@/assets/tools/figma.svg?raw')
-      },
-      {
-        name: 'Lobehub',
-        description: 'Find Free Icons',
-        href: 'https://lobehub.com/zh/resources',
-        icon: import('@/assets/tools/lobehub-color.svg?raw')
-      },
-      {
-        name: 'After Effects',
-        description: 'Motion Graphics',
-        href: 'https://www.adobe.com/products/aftereffects',
-        icon: import('@/assets/tools/aftereffects.svg?raw')
-      },
-      {
-        name: 'Premiere Pro',
-        description: 'Video Editing',
-        href: 'https://www.adobe.com/products/premiere',
-        icon: import('@/assets/tools/premiere.svg?raw')
-      }
-    ]}
-  />
-  <ToolSection
-    class='mb-5'
-    title='AI Productivity'
-    tools={[
-      {
-        name: 'Kimi',
-        description: 'Moonshot',
-        href: 'https://kimi.moonshot.cn/',
-        icon: import('@/assets/tools/kimi-color.svg?raw')
-      },
-      {
-        name: 'Wenxin',
-        description: 'Baidu',
-        href: 'https://yiyan.baidu.com/',
-        icon: import('@/assets/tools/wenxin-color.svg?raw')
-      },
-      {
-        name: 'Grok',
-        description: 'X',
-        href: 'https://grok.com/',
-        icon: import('@/assets/tools/grok.svg?raw')
-      },
-      {
-        name: 'Gemini',
-        description: 'Google',
-        href: 'https://gemini.google.com/',
-        icon: import('@/assets/tools/gemini-color.svg?raw')
-      },
-      {
-        name: 'Qianwen',
-        description: 'Alibaba',
-        href: 'https://www.tongyi.com/',
-        icon: import('@/assets/tools/qwen-color.svg?raw')
-      },
-      {
-        name: 'Hunyuan',
-        description: 'Tencent',
-        href: 'https://hunyuan.tencent.com/',
-        icon: import('@/assets/tools/hunyuan-color.svg?raw')
-      },
-      {
-        name: 'Doubao',
-        description: 'Bytedance',
-        href: 'https://www.doubao.com/chat/',
-        icon: import('@/assets/tools/doubao-color.svg?raw')
-      },
-      {
-        name: 'Glm',
-        description: 'Zhipuai',
-        href: 'https://chatglm.cn/',
-        icon: import('@/assets/tools/zhipu-color.svg?raw')
-      },
-      {
-        name: 'Consensus',
-        description: 'Read Paper',
-        href: 'https://consensus.app/',
-        icon: import('@/assets/tools/newspaper.svg?raw')
-      }
-
-
-    ]}
-  />
-  <ToolSection
-    class='mb-5'
-    title='Development'
-    tools={[
-      {
-        name: 'VS Code',
-        description: 'IDE',
-        href: 'https://code.visualstudio.com/',
-        icon: import('@/assets/tools/vscode.svg?raw')
-      },
-      {
-        name: 'Neovim',
-        description: 'IDE',
-        href: 'https://neovim.io/',
-        icon: import('@/assets/tools/neovim.svg?raw')
-      },
-      {
-        name: 'Sublime Text',
-        description: 'IDE',
-        href: 'https://www.sublimetext.com/',
-        icon: import('@/assets/tools/sublime.svg?raw')
-      }
-    ]}
-  />
-  <ToolSection
-    class='mb-5'
-    title='Environment'
-    tools={[
-      {
-        name: 'Arch Linux',
-        description: 'Linux Distribution',
-        href: 'https://archlinux.org/',
-        icon: import('@/assets/tools/archlinux.svg?raw')
-      },
-      {
-        name: 'Ubuntu 24.04 LTS',
-        description: 'Linux Distribution',
-        href: 'https://ubuntu.com/',
-        icon: import('@/assets/tools/ubuntu.svg?raw')
-      },
-      {
-        name: 'MacOS Tahoe',
-        description: 'MacBook Air',
-        href: 'https://www.apple.com/macos/',
-        icon: import('@/assets/tools/apple.svg?raw')
-      },
-      {
-        name: 'Windows 11',
-        description: 'Framework Laptop 16',
-        href: 'https://news.microsoft.com/windows11-general-availability/',
-        icon: import('@/assets/tools/windows11.svg?raw')
-      }
-    ]}
-  />
 
   {/* social-networks */}
   <h2 id='social-networks'>Social Networks</h2>
