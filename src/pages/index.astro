@@ -1,19 +1,14 @@
 ---
 import { Image } from 'astro:assets'
 
-import { Quote } from 'astro-pure/advanced'
 import { PostPreview } from 'astro-pure/components/pages'
 import { getBlogCollection, sortMDByDate } from 'astro-pure/server'
-import { Button, Card, Icon, Label } from 'astro-pure/user'
+import { Button, Icon, Label } from 'astro-pure/user'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import ProjectCard from '@/components/home/ProjectCard.astro'
 import Section from '@/components/home/Section.astro'
-import SkillLayout from '@/components/home/SkillLayout.astro'
 import avatar from '@/assets/avatar.png'
 import config from '@/site-config'
-
-const languages = ['R', 'Python', 'HTML', 'Shell']
-const Tools = ['Linux', 'Vercel', 'System recovery', 'Astro', 'Waline']
 
 const MAX_POSTS = 5
 const allPosts = await getBlogCollection()
@@ -105,7 +100,7 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
 
       {/* Get template */}
       <a
-        href='\about'
+        href='/about'
         target='_blank'
         class='flex flex-row items-center gap-x-3 rounded-full border bg-background px-4 py-2 text-sm shadow-sm transition-shadow hover:shadow-md'
       >
@@ -162,7 +157,7 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
       <Section title='Website List'>
         <div class='grid grid-cols-1 gap-3 sm:grid-cols-2'>
           <ProjectCard
-            href='\links'
+            href='/links'
             heading='Links'
             subheading='Find some useful links'
             imagePath='/src/assets/projects/OceanAvenue.png'
@@ -170,7 +165,7 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
           <ProjectCard
             href='/PlateEditor.html'
             heading='PlateEditor'
-            subheading='For qPCR Plate Editing' '
+            subheading='For qPCR Plate Editing'
             imagePath='/src/assets/projects/nova-PCRPlates.jpg'
           />
           <ProjectCard

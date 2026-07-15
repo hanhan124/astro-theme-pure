@@ -5,7 +5,6 @@ import { getBlogCollection } from 'astro-pure/server'
 import { cn } from 'astro-pure/utils'
 
 export const prerender = true
-export const partial = true
 
 const docsCollection = (await getBlogCollection('docs')) as CollectionEntry<'docs'>[]
 // Group docs by id first part (setup, integrations, advanced, etc.)
