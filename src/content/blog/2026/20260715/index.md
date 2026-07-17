@@ -107,3 +107,7 @@ qPCR 计算最初用 **Excel 宏命令（VBA）** 实现（[旧方案记录](htt
 Mynx 在每个技术决策上都选了"更麻烦但更好"的路：放弃 Electron 转 Tauri 换来十倍体积优势，放弃 VBA 宏用纯 XML 重写换来跨平台和性能，放弃 NSIS 自建安装器换来体验控制。出发点很简单：**工具应该轻量、快速、跨平台**。
 
 代码开源在 [GitHub](https://github.com/hanhan124/mynx)。
+
+## 致谢
+
+感谢以下 AI 模型在开发过程中提供的协助：GLM-5.2MMINIMAX3、GPT5.5、OPUS4.8、MIMO2.5、Agnes 2.0 Flash、qwen3、deepseek-v4。
