@@ -110,4 +110,4 @@ Mynx 在每个技术决策上都选了"更麻烦但更好"的路：放弃 Electr
 
 ## 致谢
 
-感谢以下 AI 模型在开发过程中提供的协助：GLM-5.2MMINIMAX3、GPT5.5、OPUS4.8、MIMO2.5、Agnes 2.0 Flash、qwen3、deepseek-v4。
+Mynx 的开发过程中，以下 AI 模型帮忙写代码、查文档、debug，省了不少时间：GLM-5.2、MiniMax M3、GPT-5.5、Claude Opus 4.8、MiMo 2.5、Agnes 2.0 Flash、Qwen3、DeepSeek V4。
