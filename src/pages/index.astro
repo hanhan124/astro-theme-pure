@@ -40,9 +40,10 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
           </Label>
 
           <Label
-            title=''
             as='a'
             href='https://github.com/hanhan124'
+            title=''
+            aria-label='GitHub'
             target='_blank'
             rel='noopener noreferrer'
           >
@@ -50,9 +51,10 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
           </Label>
 
           <Label
-            title=''
             as='a'
             href='https://space.bilibili.com/302091696'
+            title=''
+            aria-label='Bilibili'
             target='_blank'
             rel='noopener noreferrer'
           >
@@ -60,9 +62,10 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
           </Label>
 
           <Label
-            title=''
             as='a'
             href='https://www.zhihu.com/people/han-shuo-61-11'
+            title=''
+            aria-label='Zhihu'
             target='_blank'
             rel='noopener noreferrer'
           >
@@ -70,9 +73,10 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
           </Label>
 
           <Label
-            title=''
             as='a'
             href='http://www.coolapk.com/u/1085514'
+            title=''
+            aria-label='Coolapk'
             target='_blank'
             rel='noopener noreferrer'
           >
@@ -80,9 +84,10 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
           </Label>          
 
           <Label
-            title=''
             as='a'
             href='https://y.music.163.com/m/user?id=352934338'
+            title=''
+            aria-label='NetEase Cloud Music'
             target='_blank'
             rel='noopener noreferrer'
           >
@@ -90,9 +95,10 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
           </Label>              
 
           <Label
-            title=''
             as='a'
             href='https://v.douyin.com/AvA09RAhfiY/'
+            title=''
+            aria-label='Douyin'
             target='_blank'
             rel='noopener noreferrer'
           >
@@ -100,9 +106,10 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
           </Label> 
           
           <Label
-            title=''
             as='a'
             href='https://www.xiaohongshu.com/user/profile/5eac2d6e0000000001000b9b?xsec_token=YBABOPzP-4pU2wJ9rQzW8zfaW0y_r_rqLoqiVnkiDse08%3D&xsec_source=app_share&xhsshare=CopyLink&shareRedId=N0tDQzVJOk42NzUyOTgwNjY0OTc0Rz9L&apptime=1757791769&share_id=83f24763a08f4ac09eec95964151b99e&share_channel=copy_link'
+            title=''
+            aria-label='Xiaohongshu'
             target='_blank'
             rel='noopener noreferrer'
           >
@@ -175,12 +182,14 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
             heading='Links'
             subheading='Find some useful links'
             imagePath='/src/assets/projects/OceanAvenue.png'
+            priority
           />
           <ProjectCard
             href='/PlateEditor.html'
             heading='PlateEditor'
             subheading='For qPCR Plate Editing'
             imagePath='/src/assets/projects/nova-PCRPlates.jpg'
+            priority
           />
           <ProjectCard
             href='https://earth.google.com/'
