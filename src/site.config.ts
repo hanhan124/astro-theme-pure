@@ -117,7 +117,7 @@ export const integ: IntegrationUserConfig = {
     applyTip: [
       { name: 'Name', val: theme.title },
       { name: 'Desc', val: theme.description || 'Null' },
-      { name: 'Link', val: 'https://www.fanguanghan.homes/' }
+      { name: 'Link', val: 'https://fanguanghan.dpdns.org/' }
     ]
   },
   // Enable page search function

@@ -21,7 +21,7 @@ export const FriendLinksSchema = () =>
       applyTip: [
         { name: 'Name', val: 'Astro Pure' },
         { name: 'Desc', val: 'Null' },
-        { name: 'Link', val: 'https://www.fanguanghan.homes/' }
+        { name: 'Link', val: 'https://fanguanghan.dpdns.org/' }
       ]
     })
     .describe('Friend links for your website.')

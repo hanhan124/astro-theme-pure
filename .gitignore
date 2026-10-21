@@ -39,7 +39,11 @@ ignore.*
 bunfig.toml
 /src/content/blog/test.*
 /test/
-.vscode
-.obsidian
-.github
 .vercel
+
+### 编辑器本地状态（含窗口布局等个人数据）
+.obsidian
+
+### WorkBuddy ###
+# AI 协作工具目录（会话记忆、配色备份、截图预览）属纯本地数据，不纳入版本控制
+.workbuddy-ai/

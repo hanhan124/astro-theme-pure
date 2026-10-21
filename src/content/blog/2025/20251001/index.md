@@ -16,23 +16,23 @@ qPCR 数据处理流程，涵盖原始数据的孔板编辑、信息整理，以
 
 ## 一、孔板数据编辑与格式转换
 
-[PlateEditor](https://www.fanguanghan.homes/PlateEditor.html) 是一个用于编辑和管理 PCR 实验孔板数据的在线工具，支持 Bio-Rad 和 Roche 仪器数据的导入与可视化编辑。具体的操作步骤如下：
+[PlateEditor](https://fanguanghan.dpdns.org/PlateEditor.html) 是一个用于编辑和管理 PCR 实验孔板数据的在线工具，支持 Bio-Rad 和 Roche 仪器数据的导入与可视化编辑。具体的操作步骤如下：
 ### 1. **导入原始数据**
 
 1. Bio-Rad仪器导出方式：
 	- 在 CFX Manager 软件中选择 `Export` → `Custom Export` → `Export`
 	- 保存为 `.xlsx` 或 `.xls` 格式
-	- 在 [PlateEditor](https://www.fanguanghan.homes/PlateEditor.html) 的右侧 **"Data Import"** 区域上传该文件
+	- 在 [PlateEditor](https://fanguanghan.dpdns.org/PlateEditor.html) 的右侧 **"Data Import"** 区域上传该文件
 	
 		![biorad-1.png](https://raw.githubusercontent.com/hanhan124/blog_bed/main/img/20251002003946848.png)
 	
 2. Roche 仪器（LightCycler）导出方式：
 	- 导出 `.txt` 文本文件
 	- 全选内容并复制粘贴至 Excel 表格
-	- 另存为 `.xlsx` 文件后上传至 [PlateEditor](https://www.fanguanghan.homes/PlateEditor.html)
+	- 另存为 `.xlsx` 文件后上传至 [PlateEditor](https://fanguanghan.dpdns.org/PlateEditor.html)
 ### 2. 孔板编辑与标注
 
-在 [PlateEditor](https://www.fanguanghan.homes/PlateEditor.html) 中可对每个孔进行样本名（Sample Name）和目标基因（Target Gene）的批量标注：
+在 [PlateEditor](https://fanguanghan.dpdns.org/PlateEditor.html) 中可对每个孔进行样本名（Sample Name）和目标基因（Target Gene）的批量标注：
 
 1. **选择孔位**：
     - 单孔点击即可

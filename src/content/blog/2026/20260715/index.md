@@ -33,7 +33,7 @@ qPCR 实验结束后仪器导出长格式 Excel，每行一个测量值需要：
 
 ### 从宏命令到纯 XML 实现
 
-qPCR 计算最初用 **Excel 宏命令（VBA）** 实现（[旧方案记录](https://www.fanguanghan.homes/blog/2025/20251001)）。但有缺陷：
+qPCR 计算最初用 **Excel 宏命令（VBA）** 实现（[旧方案记录](https://fanguanghan.dpdns.org/blog/2025/20251001)）。但有缺陷：
 
 - **平台受限**：VBA 宏只在 Windows + Excel 下可用，macOS 支持不完整
 - **太慢**：Tauri 中通过 VBS 脚本间接调用 Excel COM，每次启动一个 Excel 进程，单个文件几十秒
