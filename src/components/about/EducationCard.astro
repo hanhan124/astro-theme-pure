@@ -14,7 +14,7 @@ type Props = {
   class?: string
 }
 
-const { heading, subheading, date, logo, logoOpacity = 0.3, class: className } = Astro.props
+const { heading, subheading, date, logo, logoOpacity = 0.55, class: className } = Astro.props
 ---
 
 <div
@@ -57,13 +57,13 @@ const { heading, subheading, date, logo, logoOpacity = 0.3, class: className } =
     width: auto;
     max-width: none;
     transform: translateY(-50%);
-    opacity: var(--logo-opacity, 0.3);
+    opacity: var(--logo-opacity, 0.55);
   }
 
   /* 暗色：深色线条在深底上本就不可见，提亮会让彩色部分变成发光贴纸。
      改为反相 + 去色得到灰白线条，再用 screen 混合让反相后的背景彻底消失。 */
   :global(.dark) .edu-logo-wrap :global(img) {
-    opacity: calc(var(--logo-opacity, 0.3) * 0.72);
+    opacity: calc(var(--logo-opacity, 0.55) * 0.72);
     filter: invert(1) grayscale(1);
     mix-blend-mode: screen;
   }
