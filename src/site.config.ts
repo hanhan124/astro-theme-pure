@@ -1,4 +1,5 @@
 import type { CardListData, Config, IntegrationUserConfig, ThemeUserConfig } from 'astro-pure/types'
+import { knocket } from './knocket.config'
 
 export const theme: ThemeUserConfig = {
   // === Basic configuration ===
@@ -61,6 +62,10 @@ export const theme: ThemeUserConfig = {
     year: `© ${new Date().getFullYear()}`,
     // year: `© 2019 - ${new Date().getFullYear()}`,
     links: [
+      // Knocket contact page (only rendered when configured)
+      ...(knocket.contactPage
+        ? [{ title: 'Contact', link: knocket.contactPage, style: 'text-sm' }]
+        : []),
       // Registration link
       {
         title: 'Moe ICP 20256986',

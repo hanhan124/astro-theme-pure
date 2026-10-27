@@ -3,6 +3,7 @@ import { Button, Card } from 'astro-pure/user'
 import PageLayout from '@/layouts/CommonPage.astro'
 import Substats from '@/components/about/Substats.astro'
 import EducationCard from '@/components/about/EducationCard.astro'
+import ChatLoader from '@/components/knocket/ChatLoader.astro'
 import umLogo from '@/assets/logos/um.png'
 import sjtuLogo from '@/assets/logos/sjtu.png'
 import swuLogo from '@/assets/logos/swu.png'
@@ -19,6 +20,9 @@ const headings = [
   <p>Hi, I’m Han<br />
     Here are the articles that I have written or excerpted</p>
   <Button title='Sponsor Me' class='w-fit' href='/projects#sponsorship' variant='ahead' />
+
+  {/* Live chat: renders nothing unless enabled in knocket.config.ts */}
+  <ChatLoader class='mt-4' />
 
   {/* education */}
   <h2 id='education'>Education</h2>
